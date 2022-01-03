@@ -13,6 +13,8 @@ import os
 
 from pathlib import Path
 
+from datetime import timedelta
+
 
 # Djangoのフォルダー
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,15 +51,60 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # フレームワーク一覧
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'djoser',
+    'rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
+    "taggit",
+
     # djangoのアプリ一覧
     'blog',
     'users',
 ]
 
 
+# ユーザーモデルの設定
+# ユーザーモデルの場所
+AUTH_USER_MODEL = 'users.User'
+
+# ユーザーのserializer
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
+}
+
+# JWTの設定
+SIMPLE_JWT = {
+    # トークンをJWTに設定
+    'AUTH_HEADER_TYPES': ('JWT'),
+    # トークンの持続時間の設定
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60)
+}
+
+# JWTに使うdjoserの設定
+DJOSER = {
+    # changing default serializers
+    'SERIALIZERS': {'user': 'users.serializers.UserSerializer'},
+}
+
+# restframeworkでの認証にjwtを使うことを明示
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CorsMiddlewareを追加(Corsを制御)
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -120,7 +167,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -128,7 +174,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # LANGUAGE_CODE = 'en-us'
 # TIME_ZONE = 'UTC'
 
-LANGUAGE_CODE = 'ja'
+LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
@@ -154,3 +200,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+# emailバックエンドの設定
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
