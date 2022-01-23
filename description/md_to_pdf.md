@@ -28,5 +28,5 @@ markdown-pdf --version
 
 # 実行
 ```bash
-markdown-pdf -o markdown-pdf.pdf markdown-pdf.md
+markdown-pdf -o md_to_pdf.pdf md_to_pdf.md
 ```
