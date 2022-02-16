@@ -11,10 +11,10 @@ sudo apt -y upgrade
 python3 -V
 
 # pythonコンテナをbuild
-docker build -f backend/Dockerfile.setup backend/
+docker build -f backend/Dockerfile.setup -t kosennote-backend backend/
 
 # pythonコンテナをbackendにボリュームして起動
-docker run -it -v $PWD/backend/:/usr/src/app {imageID} bash
+docker run -it -v $PWD/backend/:/usr/src/app kosennote-backend bash
 ```
 
 コンテナの中で Django を立ち上げる

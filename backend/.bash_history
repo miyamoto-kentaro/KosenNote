@@ -20,3 +20,7 @@ pip freeze -f requirements.txt
 pip freeze -r requirements.txt 
 pip freeze 
 exit
+ls
+python manage.py makemigrations
+pip freeze
+exit
