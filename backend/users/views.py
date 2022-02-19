@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import tree
+from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import status
 from rest_framework import authentication
@@ -22,35 +23,53 @@ from rest_framework.generics import UpdateAPIView
 
 from .models import PreRegister
 from .serializers import UserSerializer, PreRegisterSerializer
+from .error import AlreadyExists
 
 User = get_user_model()
 
 
 class CreatePreRegister(APIView):
-    def exist_object(self, email):
+    def exist_user(self,email):
+        try:
+            user = User.objects.get(email=email)
+            raise AlreadyExists
+        except User.DoesNotExist:
+            pass
+
+    
+    def exist_pre_register(self, email):
         try:
             preregister = PreRegister.objects.get(email=email)
             preregister.delete()
         except PreRegister.DoesNotExist:
             pass
+    
 
 
     def post(self, request):
-        self.exist_object(request.data['email'])
         # print(request)
         try:
+            self.exist_user(request.data['email'])
+            self.exist_pre_register(request.data['email'])
             serializer = PreRegisterSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({"status": "error", "data": serializer.data}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+        except AlreadyExists:
             data = {
-                "error":"DoesNotExist",
-                "error_message": "PreRegister DoesNotExist",
+                "error":"AlreadyExists",
+                "error_message": "そのメールアドレスは既に登録されています",
             }
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+        # except Exception:
+        #     data = {
+        #         "error":"DoesNotExist",
+        #         "error_message": "PreRegister DoesNotExist",
+        #     }
+        #     return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
 
 class CertificationPreRegister(APIView):
     def post(self, request):
@@ -123,6 +142,10 @@ class CertificationPreRegister(APIView):
         #     }
         #     return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
 
+
+# class ResetPassword(APIView):
+
+
 class UserEmailAlreadyExists(APIView):
     def post(self, request):
         try:
@@ -132,7 +155,7 @@ class UserEmailAlreadyExists(APIView):
                 "error_message": "このメールアドレスは既に存在しています。",
             }
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError:
+        except User.DoesNotExist:
             data = {
                 "email":request.data['email'],
             }
@@ -147,7 +170,7 @@ class UserNameAlreadyExists(APIView):
                 "error_message": "このユーザーネームは既に存在しています。",
             }
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError:
+        except User.DoesNotExist:
             data = {
                 "username":request.data['username'],
             }

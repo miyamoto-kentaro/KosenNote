@@ -78,6 +78,8 @@ REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
 }
 
+# PASSWORD_RESET_CONFIRM_URL = ['http://localhost:8080']
+
 AUTHENTICATION_BACKENDS = (
 "django.contrib.auth.backends.ModelBackend",
 "allauth.account.auth_backends.AuthenticationBackend"
@@ -91,10 +93,27 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60)
 }
 
+# DJOSER = {
+#     'PASSWORD_RESET_CONFIRM_URL': 'http://localhost:8080',
+#     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+#     'ACTIVATION_URL': '#/activate/{uid}/{token}',
+#     'SEND_ACTIVATION_EMAIL': True,
+#     'SERIALIZERS': {},
+# }
 # JWTに使うdjoserの設定
 DJOSER = {
     # changing default serializers
+    # フロントエンドのれセットVueに行くようにする
+    # 'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS' : os.environ.get("SOCIAL_AUTH_ALLOWED_REDIRECT_URIS").split(" "),
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS' : ['http://localhost:8080'],
+    'PASSWORD_RESET_CONFIRM_URL': '/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '/{uid}/{token}',
+    'ACTIVATION_URL': '/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {'user': 'users.serializers.UserSerializer'},
+    'EMAIL' : {
+        'password_reset': 'users.email.PasswordResetEmail',
+        },
 }
 
 # restframeworkでの認証にjwtを使うことを明示
@@ -122,7 +141,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR, 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -209,3 +228,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SITE_ID = 1
 # emailバックエンドの設定
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "localhost"
+EMAIL_PORT = "1025"
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_USE_TLS = False
