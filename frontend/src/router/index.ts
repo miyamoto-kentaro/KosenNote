@@ -1,11 +1,29 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Home from "../views/Home.vue";
+import SignInWithEmail from "../views/user_auth/SignInWithEmail.vue";
+import WaitingEmail from "../views/user_auth/WaitingEmail.vue";
+import EmailAuthentication from "../views/user_auth/EmailAuthentication.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Home",
     component: Home,
+  },
+  {
+    path: "/sign-in/email/send-mail",
+    name: "SignInWithEmail",
+    component: SignInWithEmail,
+  },
+  {
+    path: "/sign-in/email/waiting-email",
+    name: "WaitingEmail",
+    component: WaitingEmail,
+  },
+  {
+    path: "/sign-in/email/authentication/:email/:code",
+    name: "EmailAuthentication",
+    component: EmailAuthentication,
   },
   {
     path: "/about",
