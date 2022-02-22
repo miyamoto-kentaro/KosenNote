@@ -1,10 +1,9 @@
-
-
 from django.db.models import Q
 from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import render
 from django.conf import settings
+from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.utils import tree
 from django.utils.translation import ugettext_lazy as _
@@ -24,6 +23,7 @@ from rest_framework.generics import UpdateAPIView
 from .models import PreRegister
 from .serializers import UserSerializer, PreRegisterSerializer
 from .error import AlreadyExists
+from .email import ConfirmationEmail
 
 User = get_user_model()
 
@@ -54,6 +54,17 @@ class CreatePreRegister(APIView):
             serializer = PreRegisterSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                # from_mail = settings.EMAIL_HOST_USER
+                # # print(from_mail)
+                # # raise ValidationError(from_mail)
+                # send_mail('Subject here', 'Here is the message.', from_mail, ['kentaro.miyamoto1001@gmail.com'], fail_silently=False)
+                pre_register = PreRegister.objects.get(email=request.data['email'])
+
+                if pre_register:
+                    context = {"pre_register": pre_register}
+                    to = [pre_register.email]
+                    ConfirmationEmail(self.request, context).send(to)
+
                 return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({"status": "error", "data": serializer.data}, status=status.HTTP_400_BAD_REQUEST)
