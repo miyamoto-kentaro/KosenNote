@@ -24,8 +24,7 @@
 
           <hr />
 
-          <!-- Or <router-link to="/log-in">click here</router-link> to log in! -->
-          Or click here to log in!
+          Or <router-link to="/log-in">ログイン</router-link>
         </form>
       </div>
     </div>
