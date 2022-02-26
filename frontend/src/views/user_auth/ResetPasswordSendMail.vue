@@ -1,22 +1,30 @@
 <template>
-  <div class="waiting-email">
+  <div class="page-sign-up">
     <div class="columns">
       <div class="column is-4 is-offset-4">
-        <h1 class="title">Waiting Email</h1>
+        <h1 class="title">ResetPassword</h1>
 
         <form @submit.prevent="submitForm">
           <div class="field">
+            <label>Email Address</label>
             <div class="control">
-              <button class="button is-dark">メールの再送</button>
+              <input type="text" class="input" v-model="emailComputed" />
+            </div>
+          </div>
+
+          <div class="notification is-danger" v-if="errors.length">
+            <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <button class="button is-dark">メールを送る</button>
             </div>
           </div>
 
           <hr />
 
-          Or
-          <router-link to="/sign-in/email/send-mail"
-            >メールアドレスの再入力</router-link
-          >
+          Or <router-link to="/log-in">ログイン</router-link>
         </form>
       </div>
     </div>
@@ -39,7 +47,7 @@ export default defineComponent({
 
     let errors: string[] = [];
 
-    const email = ref("example@gmail.com");
+    const email = ref("");
 
     const emailComputed = computed({
       get: () => email.value,
@@ -50,24 +58,19 @@ export default defineComponent({
     //   alert('called submit')
     // }
 
-    // const push_send_email = () => {
-    //   if (store.state.user.email == "") {
-    //     router.push("/sign-in/email/send-mail");
-    //   }
-    // };
-    // push_send_email();
-
     const submitForm = async () => {
       try {
         errors = [];
-        if (store.state.user.email) {
+        if (email.value === "") {
+          errors.push("メールアドレスを入力してください");
+        }
+        if (!errors.length) {
           const formData = {
-            email: store.state.user.email
+            email: email.value
           };
-          // console.log(formData);
 
           await axios
-            .post("/api/v1/users/users/email/pre_register/create", formData)
+            .post("/api/v1/users/reset_password/", formData)
             .then(response => {
               toast({
                 message:
@@ -78,8 +81,9 @@ export default defineComponent({
                 duration: 2000,
                 position: "bottom-right"
               });
-              // console.log(response.data);
-              router.push("/sign-in/email/waiting-email");
+              // console.log(store.state.user);
+              // console.log(response.data)
+              //   router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
               toast({
@@ -91,8 +95,6 @@ export default defineComponent({
                 position: "bottom-right"
               });
             });
-        } else {
-          router.push("/sign-in/email/send-mail");
         }
       } catch (err) {
         alert("error");

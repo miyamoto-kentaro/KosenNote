@@ -86,7 +86,7 @@ export default defineComponent({
                 email: response.data.data.email
               };
               store.commit("setUser", user);
-              console.log(store.state.user);
+              // console.log(store.state.user);
               // console.log(response.data)
               router.push("/sign-in/email/waiting-email");
             })

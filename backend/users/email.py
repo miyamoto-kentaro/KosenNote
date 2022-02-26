@@ -44,7 +44,10 @@ class PasswordResetEmail(BaseEmailMessage):
     def get_context_data(self):
         # PasswordResetEmail can be deleted
         context = super().get_context_data()
+
+        frontend_host = settings.EMAIL_FRONTEND_HOST
         user = context.get("user")
+        context["frontend_host"] = frontend_host
         context["uid"] = utils.encode_uid(user.pk)
         context["token"] = default_token_generator.make_token(user)
         context["url"] = djoser_setting.PASSWORD_RESET_CONFIRM_URL.format(**context)

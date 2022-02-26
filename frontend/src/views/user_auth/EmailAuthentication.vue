@@ -108,7 +108,7 @@ export default defineComponent({
             password: password.value,
             code: code
           };
-          console.log(formData);
+          // console.log(formData);
 
           await axios
             .post(
@@ -117,8 +117,7 @@ export default defineComponent({
             )
             .then(response => {
               toast({
-                message:
-                  "入力したメールアドレスにメールを送りました。確認して、認証URLにアクセスしてください",
+                message: "ユーザー登録が完了しました",
                 type: "is-success",
                 dismissible: true,
                 pauseOnHover: true,
@@ -130,13 +129,13 @@ export default defineComponent({
                 email: response.data.data.email
               };
               store.commit("setUser", user);
-              console.log(store.state.user);
+              // console.log(store.state.user);
               // console.log(response.data)
               Login();
               router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
-              console.log(error.response.data);
+              // console.log(error.response.data);
               if (error.response.data.data.password) {
                 if (
                   error.response.data.data.password[0] ==
@@ -207,19 +206,19 @@ export default defineComponent({
         email: email,
         password: password.value
       };
-      console.log(formData);
+      // console.log(formData);
       await axios
         .post("/api/v1/token/login/", formData)
         .then(response => {
-          console.log("form", formData);
-          console.log("response :", response);
+          // console.log("form", formData);
+          // console.log("response :", response);
           const token = response.data.auth_token;
           store.commit("setToken", token);
           axios.defaults.headers.common["Authorization"] = "token " + token;
           localStorage.setItem("token", token);
         })
         .catch(error => {
-          console.log(error);
+          // console.log(error);
           toast({
             message: "ユーザー名かパスワードが間違っています。",
             type: "is-danger",

@@ -36,7 +36,7 @@
           <hr />
 
           Or
-          <router-link to="/sign-in/email/send-mail"
+          <router-link to="/reset-password/send-mail"
             >パスワードの変更</router-link
           >
         </form>
@@ -87,9 +87,16 @@ export default defineComponent({
     const submitForm = async () => {
       try {
         errors = [];
-        if (email.value === "") {
-          errors.push("メールアドレスを入力してください");
-        }
+        // if (email.value === "") {
+        //   toast({
+        //     message: "メールアドレスを入力してください",
+        //     type: "is-danger",
+        //     dismissible: true,
+        //     pauseOnHover: true,
+        //     duration: 2000,
+        //     position: "bottom-right"
+        //   });
+        // }
         if (!errors.length) {
           const formData = {
             email: email.value,
@@ -100,7 +107,7 @@ export default defineComponent({
           await axios
             .post("/api/v1/token/login", formData)
             .then(response => {
-              console.log(response.data);
+              // console.log(response.data);
               toast({
                 message: "ログインできました",
                 type: "is-success",
@@ -116,15 +123,51 @@ export default defineComponent({
               router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
-              console.log(error);
-              toast({
-                message: `${error.response.data.status}: ${error.response.data.data.error_message}`,
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
+              // console.log(error.response);
+
+              if (error.response.data.email) {
+                if (
+                  error.response.data.email[0] ==
+                  ["This field may not be blank."]
+                ) {
+                  toast({
+                    message: "メールアドレスを入力してください",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              } else if (error.response.data.password) {
+                if (
+                  error.response.data.password[0] ==
+                  ["This field may not be blank."]
+                ) {
+                  toast({
+                    message: "パスワードを入力してください",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              } else if (error.response.data.non_field_errors) {
+                if (
+                  error.response.data.non_field_errors[0] ==
+                  ["Unable to log in with provided credentials."]
+                ) {
+                  toast({
+                    message: "パスワードが間違っています",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              }
             });
         }
       } catch (err) {
@@ -133,7 +176,7 @@ export default defineComponent({
     };
 
     const GetUser = async () => {
-      console.log(axios.defaults.headers.common["Authorization"]);
+      // console.log(axios.defaults.headers.common["Authorization"]);
       await axios
         .get("/api/v1/users/me")
         .then(response => {
@@ -142,8 +185,8 @@ export default defineComponent({
             email: response.data.email
           };
           store.commit("setUser", user);
-          console.log(response.data);
-          console.log("user:", store.state.user);
+          // console.log(response.data);
+          // console.log("user:", store.state.user);
         })
         .catch(error => {
           // console.log(JSON.stringify(error));
