@@ -13,7 +13,7 @@
           </div>
 
           <div class="field">
-            <label>Repeat password</label>
+            <label>Repassword</label>
             <div class="control">
               <input
                 type="password"
@@ -89,7 +89,7 @@ export default defineComponent({
             token: token,
             new_password: password.value
           };
-          // console.log(formData);
+          console.log(formData);
 
           await axios
             .post("/api/v1/users/reset_password_confirm/", formData)
@@ -107,7 +107,7 @@ export default defineComponent({
               router.push("/log-in");
             })
             .catch(error => {
-              console.log(error.response.data);
+              console.log(error.response);
               if (error.response.data.data.password) {
                 if (
                   error.response.data.data.password[0] ==
