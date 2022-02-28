@@ -34,16 +34,21 @@
           <!-- Right side -->
           <div class="level-right">
             <p class="level-item">
-              <a v-on:click="temporarilySaved()"> 一時保存 </a>
-            </p>
-            <p class="level-item">
               <a class="" v-on:click="downloadButton()">
                 <span class="icon v-md-custom-icon-folder-download"></span>
-                download
+                保存
               </a>
             </p>
+
             <p class="level-item">
-              <a class="button is-success" v-on:click="submitForm()"> 投稿 </a>
+              <a>
+                <span class="icon v-md-custom-icon-folder-download"></span>
+                PDFにエクスポート
+              </a>
+              <!-- <a v-on:click="submitForm()"> PDFにエクスポート </a> -->
+            </p>
+            <p class="level-item">
+              <a class="button is-success" v-on:click="submitForm()"> 作成 </a>
             </p>
           </div>
         </nav>
@@ -219,7 +224,7 @@ export default {
     this.report = this.$store.state.report;
   },
   mounted() {
-    document.title = "CreateReport | SyskenBlog";
+    document.title = "CreateReport | KosenNote";
   },
   methods: {
     async temporarilySaved() {
