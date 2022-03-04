@@ -89,6 +89,8 @@ export default defineComponent({
             token: token,
             new_password: password.value
           };
+
+          store.commit("removeToken");
           console.log(formData);
 
           await axios
@@ -108,13 +110,39 @@ export default defineComponent({
             })
             .catch(error => {
               console.log(error.response);
-              if (error.response.data.data.password) {
+              if (error.response.data.new_password) {
                 if (
-                  error.response.data.data.password[0] ==
+                  error.response.data.new_password[0] ==
                   ["This field may not be blank."]
                 ) {
                   toast({
                     message: "パスワードが入力されていません",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                } else if (
+                  error.response.data.new_password[0] ==
+                  "This password is too short. It must contain at least 8 characters."
+                ) {
+                  toast({
+                    message: "パスワードが短すぎます",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              } else if (error.response.data.detail) {
+                console.log("detail");
+
+                if (error.response.data.detail == ["Invalid token."]) {
+                  toast({
+                    message:
+                      "URLに間違いがあります。再度メールを送ってください。",
                     type: "is-danger",
                     dismissible: true,
                     pauseOnHover: true,

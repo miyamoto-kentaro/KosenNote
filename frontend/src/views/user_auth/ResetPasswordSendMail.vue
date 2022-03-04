@@ -68,36 +68,55 @@ export default defineComponent({
           const formData = {
             email: email.value
           };
-
+          store.commit("removeToken");
           await axios
-            .post("/api/v1/users/reset_password/", formData)
+            .post("/api/v1/users/users/already_exists/email", formData)
             .then(response => {
+              // console.log(error.response);
               toast({
-                message:
-                  "入力したメールアドレスにメールを送りました。確認して、認証URLにアクセスしてください",
-                type: "is-success",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-              // console.log(store.state.user);
-              // console.log(response.data)
-              //   router.push("/sign-in/email/waiting-email");
-            })
-            .catch(error => {
-              toast({
-                message: `${error.response.data.status}: ${error.response.data.data.error_message}`,
+                message: "そのメールアドレスでユーザー登録されていません",
                 type: "is-danger",
                 dismissible: true,
                 pauseOnHover: true,
                 duration: 2000,
                 position: "bottom-right"
               });
+            })
+            .catch(error => {
+              axios
+                .post("/api/v1/users/reset_password/", formData)
+                .then(response => {
+                  console.log(response);
+
+                  toast({
+                    message:
+                      "入力したメールアドレスにメールを送りました。確認して、認証URLにアクセスしてください",
+                    type: "is-success",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                  // console.log(store.state.user);
+                  // console.log(response.data)
+                  //   router.push("/sign-in/email/waiting-email");
+                })
+                .catch(error => {
+                  console.log(error.response.data);
+                  toast({
+                    message: `${error.response.data.data.error_message}`,
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                });
             });
         }
       } catch (err) {
         alert("error");
+        console.log(err);
       }
     };
 

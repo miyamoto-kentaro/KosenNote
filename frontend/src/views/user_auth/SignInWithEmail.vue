@@ -68,6 +68,7 @@ export default defineComponent({
           const formData = {
             email: email.value
           };
+          store.commit("removeToken");
 
           await axios
             .post("/api/v1/users/users/email/pre_register/create", formData)
@@ -92,7 +93,7 @@ export default defineComponent({
             })
             .catch(error => {
               toast({
-                message: `${error.response.data.status}: ${error.response.data.data.error_message}`,
+                message: `${error.response.data.data.error_message}`,
                 type: "is-danger",
                 dismissible: true,
                 pauseOnHover: true,
