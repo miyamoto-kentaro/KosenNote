@@ -78,6 +78,13 @@ REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
 }
 
+# PASSWORD_RESET_CONFIRM_URL = ['http://localhost:8080']
+
+AUTHENTICATION_BACKENDS = (
+"django.contrib.auth.backends.ModelBackend",
+"allauth.account.auth_backends.AuthenticationBackend"
+)
+
 # JWTの設定
 SIMPLE_JWT = {
     # トークンをJWTに設定
@@ -86,16 +93,33 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60)
 }
 
+# DJOSER = {
+#     'PASSWORD_RESET_CONFIRM_URL': 'http://localhost:8080',
+#     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+#     'ACTIVATION_URL': '#/activate/{uid}/{token}',
+#     'SEND_ACTIVATION_EMAIL': True,
+#     'SERIALIZERS': {},
+# }
 # JWTに使うdjoserの設定
 DJOSER = {
     # changing default serializers
+    # フロントエンドのれセットVueに行くようにする
+    # 'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS' : os.environ.get("SOCIAL_AUTH_ALLOWED_REDIRECT_URIS").split(" "),
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS' : ['http://localhost:8080'],
+    'PASSWORD_RESET_CONFIRM_URL': '/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '/{uid}/{token}',
+    'ACTIVATION_URL': '/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {'user': 'users.serializers.UserSerializer'},
+    'EMAIL' : {
+        'password_reset': 'users.email.PasswordResetEmail',
+        },
 }
 
 # restframeworkでの認証にjwtを使うことを明示
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
 }
 
@@ -117,7 +141,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR, 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -193,8 +217,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -202,5 +224,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
+
+
+
 # emailバックエンドの設定
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND",'django.core.mail.backends.console.EmailBackend')
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = os.environ.get("EMAIL_PORT", "1025")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+# EMAIL_USE_SSL = False
+# EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", True)
+# EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", False)
+EMAIL_FRONTEND_HOST = os.environ.get("EMAIL_FRONTEND_HOST", "http://localhost:8080")

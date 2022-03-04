@@ -8,10 +8,10 @@ sudo apt update
 sudo apt -y upgrade
 
 # nodeコンテナをbuild
-docker build -f frontend/Dockerfile.setup frontend/
+docker build -f frontend/Dockerfile.setup -t kosennote-frontend frontend/
 
 # nodeコンテナをfrontにボリュームして起動
-docker run -it -v $PWD/frontend/:/usr/src/app {imageID} bash
+docker run -it -v $PWD/frontend/:/usr/src/app kosennote-frontend bash
 ```
 
 コンテナの中で Vue を立ち上げる
@@ -109,3 +109,21 @@ docker-compose.local.yml を起動して、コンテナが local で動くかを
 docker-compose -f docker-compose.local.yml up -d --build
 docker-compose -f docker-compose.local.yml down -v
 ```
+
+Gitでファイルを持ってきてfrontend/node_modulesが存在しないときは
+
+```
+# nodeコンテナをbuild
+docker build -f frontend/Dockerfile.setup -t kosennote-frontend frontend/
+
+# nodeコンテナをfrontにボリュームして起動
+docker run -it -v $PWD/frontend/:/usr/src/app kosennote-frontend bash
+```
+
+コンテナを立ち上げて
+
+```
+npm install
+```
+
+npmインストールをすると、エラーがなくなる。
