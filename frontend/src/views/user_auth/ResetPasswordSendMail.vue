@@ -17,9 +17,20 @@
           </div>
 
           <div class="field">
-            <div class="control">
-              <button class="button is-dark">メールを送る</button>
-            </div>
+            <template v-if="isLoading">
+              <div class="control">
+                <a class="button is-dark">
+                  メールを送る
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="control">
+                <button class="button is-dark">
+                  メールを送る
+                </button>
+              </div>
+            </template>
           </div>
 
           <hr />
@@ -59,6 +70,7 @@ export default defineComponent({
     // }
 
     const submitForm = async () => {
+      store.commit("setIsLoading", true);
       try {
         errors = [];
         if (email.value === "") {
@@ -70,19 +82,9 @@ export default defineComponent({
           };
           store.commit("removeToken");
           await axios
-            .post("/api/v1/users/users/already_exists/email", formData)
+            .post("/api/v1/users/users/dosenot_exists/email", formData)
             .then(response => {
               // console.log(error.response);
-              toast({
-                message: "そのメールアドレスでユーザー登録されていません",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-            })
-            .catch(error => {
               axios
                 .post("/api/v1/users/reset_password/", formData)
                 .then(response => {
@@ -97,6 +99,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                   // console.log(store.state.user);
                   // console.log(response.data)
                   //   router.push("/sign-in/email/waiting-email");
@@ -111,18 +114,32 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 });
+            })
+            .catch(error => {
+              toast({
+                message: "そのメールアドレスでユーザー登録されていません",
+                type: "is-danger",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+              store.commit("setIsLoading", false);
             });
         }
       } catch (err) {
         alert("error");
         console.log(err);
+        store.commit("setIsLoading", false);
       }
     };
 
     return {
       emailComputed,
       errors,
+      isLoading: computed(() => store.state.isLoading),
       submitForm
     };
   }

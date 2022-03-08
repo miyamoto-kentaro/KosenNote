@@ -35,9 +35,20 @@
           </div>
 
           <div class="field">
-            <div class="control">
-              <button class="button is-dark">ユーザー登録</button>
-            </div>
+            <template v-if="isLoading">
+              <div class="control">
+                <a class="button is-dark">
+                  ユーザー登録
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="control">
+                <button class="button is-dark">
+                  ユーザー登録
+                </button>
+              </div>
+            </template>
           </div>
           Or
           <router-link to="/sign-in/email/send-mail"
@@ -95,6 +106,7 @@ export default defineComponent({
     });
 
     const submitForm = async () => {
+      store.commit("setIsLoading", true);
       try {
         errors = [];
         if (password.value !== password2.value) {
@@ -110,6 +122,7 @@ export default defineComponent({
           };
           // console.log(formData);
 
+          store.commit("removeToken");
           await axios
             .post(
               "/api/v1/users/users/email/pre_register/certification",
@@ -132,10 +145,11 @@ export default defineComponent({
               // console.log(store.state.user);
               // console.log(response.data)
               Login();
+              store.commit("setIsLoading", false);
               router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
-              // console.log(error.response.data);
+              console.log(error.response.data);
               if (error.response.data.data.password) {
                 if (
                   error.response.data.data.password[0] ==
@@ -149,6 +163,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 }
               } else if (error.response.data.data.username) {
                 if (
@@ -163,6 +178,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 } else if (
                   error.response.data.data.username[0] ==
                   ["This field may not be blank."]
@@ -175,6 +191,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 }
               } else if (error.response.data.data.email) {
                 if (
@@ -191,13 +208,25 @@ export default defineComponent({
                     position: "bottom-right"
                   });
                 }
+              } else {
+                toast({
+                  message: `${error.response.data.data.error_message}`,
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
               }
+              store.commit("setIsLoading", false);
             });
         } else {
           alert(errors);
+          store.commit("setIsLoading", false);
         }
       } catch (err) {
         console.log(err);
+        store.commit("setIsLoading", false);
       }
     };
 
@@ -235,6 +264,7 @@ export default defineComponent({
       passwordComputed,
       password2Computed,
       errors,
+      isLoading: computed(() => store.state.isLoading),
       submitForm
     };
   }

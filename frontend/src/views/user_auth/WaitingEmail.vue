@@ -7,7 +7,20 @@
         <form @submit.prevent="submitForm">
           <div class="field">
             <div class="control">
-              <button class="button is-dark">メールの再送</button>
+              <template v-if="isLoading">
+                <div class="control">
+                  <a class="button is-dark">
+                    メールを送る
+                  </a>
+                </div>
+              </template>
+              <template v-else>
+                <div class="control">
+                  <button class="button is-dark">
+                    メールを送る
+                  </button>
+                </div>
+              </template>
             </div>
           </div>
 
@@ -39,7 +52,7 @@ export default defineComponent({
 
     let errors: string[] = [];
 
-    const email = ref("example@gmail.com");
+    const email = ref("");
 
     const emailComputed = computed({
       get: () => email.value,
@@ -58,6 +71,7 @@ export default defineComponent({
     // push_send_email();
 
     const submitForm = async () => {
+      store.commit("setIsLoading", true);
       try {
         errors = [];
         if (store.state.user.email) {
@@ -97,12 +111,14 @@ export default defineComponent({
       } catch (err) {
         alert("error");
       }
+      store.commit("setIsLoading", false);
     };
 
     return {
       emailComputed,
       errors,
-      submitForm
+      submitForm,
+      isLoading: computed(() => store.state.isLoading)
     };
   }
 });

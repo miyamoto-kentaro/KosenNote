@@ -19,6 +19,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.generics import DestroyAPIView
 from rest_framework.generics import UpdateAPIView
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from .models import PreRegister
 from .serializers import UserSerializer, PreRegisterSerializer
@@ -154,7 +155,20 @@ class CertificationPreRegister(APIView):
         #     return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ResetPassword(APIView):
+class UpdateUser(APIView):
+    authentication_classes = [TokenAuthentication]
+    def get(self, request, format=None):
+        content = {'user': str(request.user), 'auth': str(request.auth)}
+        return Response(content)
+
+# class CheckView(APIView):
+#     authentication_classes = [TokenAuthentication, ]
+
+#     def get(self, request, *args, **kwargs):
+#         return Response({"data": "中身です"})
+#     # def post(self, request, format=None):
+#     #     user = User.objects.get()
+
 
 
 class UserEmailAlreadyExists(APIView):
@@ -186,3 +200,33 @@ class UserNameAlreadyExists(APIView):
                 "username":request.data['username'],
             }
             return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+
+class UserEmailDoesNotExist(APIView):
+    def post(self, request):
+        try:
+            user = User.objects.get(email=request.data["email"])
+            data = {
+                "email":request.data['email'],
+            }
+            return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserNameDoesNotExist(APIView):
+    def post(self, request):
+        try:
+            user = User.objects.get(username=request.data["username"])
+            data = {
+                "username":request.data['username'],
+            }
+            return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
