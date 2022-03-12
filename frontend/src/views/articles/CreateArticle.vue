@@ -81,9 +81,6 @@ export default defineComponent({
 
     let errors: string[] = [];
 
-    const email = route.params.email;
-    const code = route.params.code;
-
     const username = ref("");
 
     const usernameComputed = computed({
@@ -115,38 +112,20 @@ export default defineComponent({
 
         if (!errors.length) {
           const formData = {
-            email: email,
-            username: username.value,
-            password: password.value,
-            code: code
+            title: "sample",
+            tags: [],
+            content: "sample text",
+            category: null,
+            publish: true
           };
           // console.log(formData);
 
-          store.commit("removeToken");
+          // store.commit("removeToken");
           await axios
-            .post(
-              "/api/v1/users/users/email/pre_register/certification",
-              formData
-            )
+            .post("/api/v1/articles/articles/create/", formData)
             .then(response => {
-              toast({
-                message: "ユーザー登録が完了しました",
-                type: "is-success",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-              const user = {
-                username: response.data.data.username,
-                email: response.data.data.email
-              };
-              store.commit("setUser", user);
-              // console.log(store.state.user);
-              // console.log(response.data)
-              Login();
+              console.log(response.data);
               store.commit("setIsLoading", false);
-              router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
               console.log(error.response.data);
@@ -228,35 +207,6 @@ export default defineComponent({
         console.log(err);
         store.commit("setIsLoading", false);
       }
-    };
-
-    const Login = async () => {
-      const formData = {
-        email: email,
-        password: password.value
-      };
-      // console.log(formData);
-      await axios
-        .post("/api/v1/token/login/", formData)
-        .then(response => {
-          // console.log("form", formData);
-          // console.log("response :", response);
-          const token = response.data.auth_token;
-          store.commit("setToken", token);
-          axios.defaults.headers.common["Authorization"] = "token " + token;
-          localStorage.setItem("token", token);
-        })
-        .catch(error => {
-          // console.log(error);
-          toast({
-            message: "ユーザー名かパスワードが間違っています。",
-            type: "is-danger",
-            dismissible: true,
-            pauseOnHover: true,
-            duration: 2000,
-            position: "bottom-right"
-          });
-        });
     };
 
     return {

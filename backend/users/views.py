@@ -97,7 +97,7 @@ class CertificationPreRegister(APIView):
                     "username": request.data['username'],
                     "password": request.data['password']
                 }
-                serializer = UserSerializer(data=request.data)
+                serializer = UserSerializer(data=data)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)

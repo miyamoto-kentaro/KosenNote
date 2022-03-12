@@ -6,6 +6,8 @@ import EmailAuthentication from "../views/user_auth/EmailAuthentication.vue";
 import ResetPassword from "../views/user_auth/ResetPassword.vue";
 import ResetPasswordSendMail from "../views/user_auth/ResetPasswordSendMail.vue";
 import LogIn from "../views/user_auth/LogIn.vue";
+import Profile from "../views/user_auth/Profile.vue";
+import CreateArticle from "../views/articles/CreateArticle.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -36,6 +38,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/log-in",
     name: "LogIn",
     component: LogIn
+  }, {
+    path: "/profile/:username",
+    name: "Profile",
+    component: Profile
+  }, {
+    path: "/create-article",
+    name: "CreateArticle",
+    component: CreateArticle
   }, {
     path: "/about",
     name: "About",

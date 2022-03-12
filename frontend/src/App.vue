@@ -53,21 +53,23 @@
           <div class="navbar-item">
             <div class="buttons">
               <template v-if="isAuthenticated">
-                <router-link to="/my-account" class="button is-light"
-                  >アカウント</router-link
-                >
+                <a @click="my_pfofile" class="button is-light">アカウント</a>
+                <router-link to="/create-article" class="button is-success">
+                  <span class="icon v-md-custom-icon-quill"></span>
+                  <span>投稿</span>
+                </router-link>
               </template>
 
               <template v-else>
                 <router-link to="/log-in" class="button is-light"
                   >Log in</router-link
                 >
+                <router-link
+                  to="/sign-in/email/send-mail"
+                  class="button is-success"
+                  >Sign in</router-link
+                >
               </template>
-
-              <router-link to="/create-article" class="button is-success">
-                <span class="icon v-md-custom-icon-quill"></span>
-                <span>投稿</span>
-              </router-link>
             </div>
           </div>
         </div>
@@ -135,6 +137,9 @@ export default defineComponent({
       showMobileMenuComputed.value = !showMobileMenuComputed.value;
       // console.log(showMobileMenuComputed.value);
     };
+    const my_pfofile = () => {
+      router.push(`/profile/${store.state.user.username}`);
+    };
     onMounted(() => {
       reload();
       // is_loading = store.state.is_loading;
@@ -142,8 +147,10 @@ export default defineComponent({
     return {
       isLoading: computed(() => store.state.isLoading),
       isAuthenticated: computed(() => store.state.isAuthenticated),
+      user: computed(() => store.state.user),
       showMobileMenuComputed,
-      switch_show_mobile
+      switch_show_mobile,
+      my_pfofile
     };
   },
   computed: {}

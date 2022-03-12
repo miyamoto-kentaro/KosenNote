@@ -12,7 +12,7 @@ urlpatterns = [
 
     # User情報を取得
     path('me', views.UpdateUser.as_view()),
-    # path('check/', views.UpdateUser.as_view()),
+    path('check/', views.UpdateUser.as_view()),
 
     # emailとusernameでUserを検索して、重複を確認するAPI
     path('already_exists/email', views.UserEmailAlreadyExists.as_view()),

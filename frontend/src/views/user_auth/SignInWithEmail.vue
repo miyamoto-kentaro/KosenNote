@@ -1,5 +1,5 @@
 <template>
-  <div class="page-sign-up">
+  <div class="sign-in-with-email">
     <div class="columns">
       <div class="column is-4 is-offset-4">
         <h1 class="title">Sign up</h1>

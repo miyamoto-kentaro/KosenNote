@@ -1,5 +1,5 @@
 <template>
-  <div class="page-sign-up">
+  <div class="reset-password-send-mail">
     <div class="columns">
       <div class="column is-4 is-offset-4">
         <h1 class="title">ResetPassword</h1>
