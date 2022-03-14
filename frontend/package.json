@@ -7,10 +7,14 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.179",
+    "@types/marked": "^4.0.2",
     "axios": "^0.24.0",
     "bulma": "^0.9.3",
     "bulma-toast": "^2.4.1",
     "core-js": "^3.6.5",
+    "lodash": "^4.17.21",
+    "marked": "^4.0.12",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"

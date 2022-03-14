@@ -28,7 +28,6 @@ from .email import ConfirmationEmail
 
 User = get_user_model()
 
-
 class CreatePreRegister(APIView):
     def exist_user(self,email):
         try:
