@@ -1,0 +1,147 @@
+@font-face {
+  font-family: 'kosen-note';
+  src:  url('../fonts/kosen-note.eot?j4djdc');
+  src:  url('../fonts/kosen-note.eot?j4djdc#iefix') format('embedded-opentype'),
+    url('../fonts/kosen-note.ttf?j4djdc') format('truetype'),
+    url('../fonts/kosen-note.woff?j4djdc') format('woff'),
+    url('../fonts/kosen-note.svg?j4djdc#kosen-note') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="kosen-note-icon-"], [class*=" kosen-note-icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'kosen-note' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.kosen-note-icon-home:before {
+  content: "\e900";
+}
+.kosen-note-icon-quill:before {
+  content: "\e907";
+}
+.kosen-note-icon-droplet:before {
+  content: "\e90b";
+}
+.kosen-note-icon-image:before {
+  content: "\e90d";
+}
+.kosen-note-icon-book:before {
+  content: "\e91f";
+}
+.kosen-note-icon-folder-download:before {
+  content: "\e933";
+}
+.kosen-note-icon-price-tags:before {
+  content: "\e936";
+}
+.kosen-note-icon-envelop:before {
+  content: "\e945";
+}
+.kosen-note-icon-printer:before {
+  content: "\e954";
+}
+.kosen-note-icon-undo:before {
+  content: "\e965";
+}
+.kosen-note-icon-redo:before {
+  content: "\e966";
+}
+.kosen-note-icon-bubble:before {
+  content: "\e96b";
+}
+.kosen-note-icon-user-plus:before {
+  content: "\e973";
+}
+.kosen-note-icon-user-minus:before {
+  content: "\e974";
+}
+.kosen-note-icon-search:before {
+  content: "\e986";
+}
+.kosen-note-icon-enlarge:before {
+  content: "\e989";
+}
+.kosen-note-icon-lock:before {
+  content: "\e98f";
+}
+.kosen-note-icon-unlocked:before {
+  content: "\e990";
+}
+.kosen-note-icon-cog:before {
+  content: "\e994";
+}
+.kosen-note-icon-bin:before {
+  content: "\e9ac";
+}
+.kosen-note-icon-list2:before {
+  content: "\e9bb";
+}
+.kosen-note-icon-heart:before {
+  content: "\e9da";
+}
+.kosen-note-icon-warning:before {
+  content: "\ea07";
+}
+.kosen-note-icon-notification:before {
+  content: "\ea08";
+}
+.kosen-note-icon-question:before {
+  content: "\ea09";
+}
+.kosen-note-icon-enter:before {
+  content: "\ea13";
+}
+.kosen-note-icon-exit:before {
+  content: "\ea14";
+}
+.kosen-note-icon-font:before {
+  content: "\ea5c";
+}
+.kosen-note-icon-font-size:before {
+  content: "\ea61";
+}
+.kosen-note-icon-bold:before {
+  content: "\ea62";
+}
+.kosen-note-icon-underline:before {
+  content: "\ea63";
+}
+.kosen-note-icon-italic:before {
+  content: "\ea64";
+}
+.kosen-note-icon-strikethrough:before {
+  content: "\ea65";
+}
+.kosen-note-icon-sigma:before {
+  content: "\ea67";
+}
+.kosen-note-icon-superscript:before {
+  content: "\ea69";
+}
+.kosen-note-icon-subscript:before {
+  content: "\ea6a";
+}
+.kosen-note-icon-paragraph-left:before {
+  content: "\ea77";
+}
+.kosen-note-icon-paragraph-center:before {
+  content: "\ea78";
+}
+.kosen-note-icon-paragraph-right:before {
+  content: "\ea79";
+}
+.kosen-note-icon-embed2:before {
+  content: "\ea80";
+}

@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     path('articles/list/latest/', views.LatestArticlesList.as_view()),
-    path('/articles/list/', views.UserArticleList.as_view()),
+    path('articles/list/', views.UserArticleList.as_view()),
     # path('me/articles/', views.MyArticleList.as_view()),
     path('articles/show-all/', views.ShowArticle.as_view()),
     path('articles/create/', views.CreateArticle.as_view()),
