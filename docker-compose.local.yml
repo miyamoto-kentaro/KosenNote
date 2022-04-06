@@ -13,8 +13,8 @@ services:
       - 8000:8000
     env_file:
       - ./env_dir/.env.local.backend
-    # depends_on:
-    #   - db
+    depends_on:
+      - db
 
   frontend:
     container_name: frontend_local
@@ -32,10 +32,15 @@ services:
   db:
     container_name: postgres_local
     image: postgres:latest
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     env_file:
       - ./env_dir/.env.local.db
+    volumes:
+      # - postgres_data:/var/lib/postgresql/data
+      - test_db:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
 volumes:
-  postgres_data:
+  # postgres_data:
+  #   external: true
+  test_db:
+    external: true

@@ -1,6 +1,5 @@
 FROM node:17-bullseye-slim
 
-
 # ホームディレクトリの作成
 RUN mkdir -p /app
 ENV HOME=/app

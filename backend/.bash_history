@@ -24,3 +24,8 @@ ls
 python manage.py makemigrations
 pip freeze
 exit
+python manage.py startapp articles
+pip install -f requirements.txt 
+pip install django
+python manage.py startapp articles
+exit

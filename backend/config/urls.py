@@ -8,7 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/', include('djoser.urls.authtoken')),
-    # path('api/v1/', include('blog.urls')),
+    path('api/v1/articles/', include('articles.urls')),
     path('api/v1/users/users/',include('users.urls')),
     
 ]

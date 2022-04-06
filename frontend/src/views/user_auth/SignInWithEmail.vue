@@ -1,5 +1,5 @@
 <template>
-  <div class="page-sign-up">
+  <div class="sign-in-with-email">
     <div class="columns">
       <div class="column is-4 is-offset-4">
         <h1 class="title">Sign up</h1>
@@ -17,9 +17,20 @@
           </div>
 
           <div class="field">
-            <div class="control">
-              <button class="button is-dark">メールを送る</button>
-            </div>
+            <template v-if="isLoading">
+              <div class="control">
+                <a class="button is-dark">
+                  メールを送る
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="control">
+                <button class="button is-dark">
+                  メールを送る
+                </button>
+              </div>
+            </template>
           </div>
 
           <hr />
@@ -59,6 +70,7 @@ export default defineComponent({
     // }
 
     const submitForm = async () => {
+      store.commit("setIsLoading", true);
       try {
         errors = [];
         if (email.value === "") {
@@ -105,11 +117,13 @@ export default defineComponent({
       } catch (err) {
         alert("error");
       }
+      store.commit("setIsLoading", false);
     };
 
     return {
       emailComputed,
       errors,
+      isLoading: computed(() => store.state.isLoading),
       submitForm
     };
   }

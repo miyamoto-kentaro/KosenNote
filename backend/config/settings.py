@@ -64,8 +64,9 @@ INSTALLED_APPS = [
     "taggit",
 
     # djangoのアプリ一覧
-    'blog',
+    # 'blog',
     'users',
+    'articles',
 ]
 
 

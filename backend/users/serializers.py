@@ -32,6 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
 class PreRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:

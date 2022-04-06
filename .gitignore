@@ -2,7 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+postgres_data
+docker-entrypoint-initdb.d
+postgres
 # C extensions
 *.so
 
