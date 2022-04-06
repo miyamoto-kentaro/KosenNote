@@ -26,6 +26,7 @@ from .serializers import UserSerializer, PreRegisterSerializer
 from .error import AlreadyExists
 from .email import ConfirmationEmail
 
+
 User = get_user_model()
 
 class CreatePreRegister(APIView):
@@ -160,14 +161,13 @@ class UpdateUser(APIView):
         content = {'user': str(request.user), 'auth': str(request.auth)}
         return Response(content)
 
-# class CheckView(APIView):
-#     authentication_classes = [TokenAuthentication, ]
+class CheckView(APIView):
+    authentication_classes = [TokenAuthentication, ]
 
-#     def get(self, request, *args, **kwargs):
-#         return Response({"data": "中身です"})
-#     # def post(self, request, format=None):
-#     #     user = User.objects.get()
-
+    def get(self, request, *args, **kwargs):
+        return Response({"data": "中身です"})
+    # def post(self, request, format=None):
+    #     user = User.objects.get()
 
 
 class UserEmailAlreadyExists(APIView):

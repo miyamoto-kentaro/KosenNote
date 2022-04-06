@@ -2,23 +2,25 @@
   <div class="column is-3 is-narrow">
     <div class="card">
       <header class="card-header">
-        <p class="card-header-title">
-          {{ article.title }}
+        <p class="card-header-title article-title">
+          {{ props.article.title }}
         </p>
         <button
           class="card-header-icon"
           aria-label="more options"
-          v-on:click="contant_activate"
+          @click="showArticleComputed = !showArticleComputed"
         >
           <span class="icon">
-            <i class="icon v-md-icon-arrow-down" aria-hidden="true"></i>
+            <i class="kosen-note-icon-circle-down"></i>
           </span>
         </button>
       </header>
       <div class="card-content">
         <div class="content">
-          <p v-if="article.author" class="is-size-6 lineClamp subtitle">
-            作者：{{ article.get_author_name }}
+          <p v-if="props.article.author" class="is-size-6 lineClamp subtitle">
+            作者：<router-link :to="author_profile">{{
+              props.article.get_author_name
+            }}</router-link>
           </p>
           <p v-else class="is-size-6 lineClamp subtitle">
             作者はアカウントを削除しました
@@ -26,7 +28,7 @@
           <p class="is-size-6 has-text-grey lineClamp">
             タグ：<span
               class="tag is-light"
-              v-for="tag in article.tags"
+              v-for="tag in props.article.tags"
               v-bind:key="tag.id"
               v-bind:article="article"
             >
@@ -42,7 +44,7 @@
       </div>
       <footer class="card-footer">
         <router-link
-          v-bind:to="`/article/${article.id}/`"
+          v-bind:to="`/article-detail/${props.article.id}/`"
           class="button is-light mt-4"
           style="margin-left: auto;"
           >記事を見る</router-link
@@ -50,22 +52,22 @@
       </footer>
     </div>
 
-    <div class="modal " v-bind:class="{ 'is-active': contant_active }">
-      <div @click="contant_activate" class="modal-background"></div>
+    <div class="modal " v-bind:class="{ 'is-active': showArticleComputed }">
+      <div
+        @click="showArticleComputed = !showArticleComputed"
+        class="modal-background"
+      ></div>
       <div class="modal-content">
         <article class="message">
-          <div class="message-header">
-            <p>{{ article.title }}</p>
+          <div class="message-header article-title">
+            <p>{{ props.article.title }}</p>
           </div>
           <div class="message-body">
-            <v-md-preview
-              class="article-content"
-              :text="article.content"
-            ></v-md-preview>
+            <MrkdownCompiler :text="article.content" />
           </div>
         </article>
         <button
-          @click="contant_activate"
+          @click="showArticleComputed = !showArticleComputed"
           class="modal-close is-large"
           aria-label="close"
         ></button>
@@ -81,11 +83,39 @@ import { useStore } from "vuex";
 import { toast } from "bulma-toast";
 import axios from "axios";
 
+import MrkdownCompiler from "../components/MrkdownCompiler.vue";
+
 export default defineComponent({
-  setup() {
+  name: "ArticleBox",
+  components: {
+    MrkdownCompiler
+  },
+  props: {
+    article: Object
+  },
+  setup(props) {
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+
+    const showArticle = ref(false);
+    const showArticleComputed = computed({
+      get: () => showArticle.value,
+      set: value => (showArticle.value = value)
+    });
+
+    const author_profile = computed(() => {
+      if (props.article) {
+        return "/profile/" + props.article.get_author_name + "/";
+      } else {
+        return "/";
+      }
+    });
+    return {
+      props,
+      showArticleComputed,
+      author_profile
+    };
   }
 });
 </script>
@@ -105,5 +135,16 @@ export default defineComponent({
   /*IE対策*/
   line-height: 1.5em;
   max-height: 4.5em;
+}
+.article-title {
+  /*上下方向にはみ出した要素ををスクロールさせる*/
+  overflow-x: scroll;
+  /*スクロールバー非表示（IE・Edge）*/
+  -ms-overflow-style: none;
+  /*スクロールバー非表示（Firefox）*/
+  scrollbar-width: none;
+}
+.article-title::-webkit-scrollbar {
+  display: none;
 }
 </style>

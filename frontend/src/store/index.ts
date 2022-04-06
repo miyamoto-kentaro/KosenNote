@@ -7,10 +7,19 @@ interface User {
   email: string;
 }
 
+interface SavedArticle {
+  title: string;
+  tags: string[];
+  content: string;
+  category: string;
+  publish: boolean;
+}
+
 export interface GlobalState {
   isAuthenticated: boolean;
   token: string | null;
   user: User;
+  saved_article: SavedArticle;
   isLoading: boolean;
 }
 
@@ -25,6 +34,13 @@ export const store = createStore({
         username: "",
         email: ""
       },
+      saved_article: {
+        title: "",
+        tags: [],
+        content: "",
+        category: "",
+        publish: false
+      },
       isLoading: false
     };
   },
@@ -33,6 +49,7 @@ export const store = createStore({
     reloadStore(state : GlobalState) {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
+      const saved_article = localStorage.getItem("saved_article");
       console.log("is token");
       if (!(user === '""') && !(user === null)) {
         state.user = JSON.parse(user);
@@ -51,19 +68,34 @@ export const store = createStore({
         state.token = "";
         state.isAuthenticated = false;
       }
+
+      if (!(saved_article === '"') && !(saved_article === null)) {
+        state.saved_article = JSON.parse(saved_article);
+      } else {
+        state.saved_article = {
+          title: "",
+          tags: [],
+          content: "",
+          category: "",
+          publish: false
+        };
+      }
       console.log(state);
     },
+
     setToken(state : GlobalState, token) {
       state.token = token;
       state.isAuthenticated = true;
 
-      localStorage.setItem("token", JSON.stringify(state.token));
+      console.log(token);
+
+      localStorage.setItem("token", token);
       axios.defaults.headers.common["Authorization"] = "Token " + token;
     },
     removeToken(state : GlobalState) {
       state.token = "";
       state.isAuthenticated = false;
-      localStorage.setItem("token", JSON.stringify(state.token));
+      localStorage.setItem("token", state.token);
       axios.defaults.headers.common["Authorization"] = "";
     },
     setIsLoading(state : GlobalState, status) {
@@ -80,6 +112,21 @@ export const store = createStore({
         email: ""
       };
       localStorage.setItem("user", JSON.stringify(state.user));
+    },
+    setSavedArticle(state : GlobalState, saved_article) {
+      state.saved_article = saved_article;
+
+      localStorage.setItem("saved_article", JSON.stringify(state.saved_article));
+    },
+    removeSavedArticle(state : GlobalState) {
+      (state.saved_article = {
+        title: "",
+        tags: [],
+        content: "",
+        category: "",
+        publish: false
+      }),
+      localStorage.setItem("saved_article", JSON.stringify(state.saved_article));
     }
   }
 });

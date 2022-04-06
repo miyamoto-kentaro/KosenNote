@@ -40,7 +40,7 @@
                 <div class="control">
                   <button class="button is-success">
                     <span class="icon">
-                      <i class="icon v-md-custom-icon-search"></i>
+                      <i class="icon kosen-note-icon-search"></i>
                     </span>
                   </button>
                 </div>
@@ -53,9 +53,11 @@
           <div class="navbar-item">
             <div class="buttons">
               <template v-if="isAuthenticated">
-                <a @click="my_pfofile" class="button is-light">アカウント</a>
+                <router-link :to="my_profile" class="button is-light"
+                  >アカウント</router-link
+                >
                 <router-link to="/create-article" class="button is-success">
-                  <span class="icon v-md-custom-icon-quill"></span>
+                  <span class="icon kosen-note-icon-quill"></span>
                   <span>投稿</span>
                 </router-link>
               </template>
@@ -104,6 +106,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    console.log("store", store.state.user);
 
     // const isLoading = ref(false);
 
@@ -137,9 +140,6 @@ export default defineComponent({
       showMobileMenuComputed.value = !showMobileMenuComputed.value;
       // console.log(showMobileMenuComputed.value);
     };
-    const my_pfofile = () => {
-      router.push(`/profile/${store.state.user.username}`);
-    };
     onMounted(() => {
       reload();
       // is_loading = store.state.is_loading;
@@ -150,7 +150,7 @@ export default defineComponent({
       user: computed(() => store.state.user),
       showMobileMenuComputed,
       switch_show_mobile,
-      my_pfofile
+      my_profile: computed(() => "/profile/" + store.state.user.username + "/")
     };
   },
   computed: {}

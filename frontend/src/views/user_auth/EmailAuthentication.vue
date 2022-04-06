@@ -243,8 +243,6 @@ export default defineComponent({
           // console.log("response :", response);
           const token = response.data.auth_token;
           store.commit("setToken", token);
-          axios.defaults.headers.common["Authorization"] = "token " + token;
-          localStorage.setItem("token", token);
         })
         .catch(error => {
           // console.log(error);

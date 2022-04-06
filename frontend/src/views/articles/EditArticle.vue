@@ -3,56 +3,59 @@
     <div class="columns">
       <div class="column title is-10 is-offset-1">記事の作成</div>
     </div>
-    <div class="columns">
-      <div class="column">
-        <div class="columns">
-          <div class="column is-3">
-            <div class="field has-addons">
-              <p class="control">
-                <input
-                  class="input"
-                  type="text"
-                  placeholder="タイトル"
-                  v-model="articleComputed.title"
-                />
-              </p>
+
+    <template v-if="articleComputed">
+      <div class="columns">
+        <div class="column">
+          <div class="columns">
+            <div class="column is-3">
+              <div class="field has-addons">
+                <p class="control">
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="タイトル"
+                    v-model="articleComputed.title"
+                  />
+                </p>
+              </div>
             </div>
-          </div>
-          <div class="column is-3">
-            <TagInput v-model="articleComputed.tags" />
-          </div>
-          <div class="column">
-            <label class="checkbox">
-              <input type="checkbox" v-model="articleComputed.publish" />
-              公開
-            </label>
-          </div>
-          <div class="column">
-            <a @click="save_article">
-              一時保存
-            </a>
-          </div>
-          <div class="column">
-            <a @click="downloadButton()">
-              <span class="icon">
-                <i class="kosen-note-icon-folder-download"></i>
-              </span>
-              download
-            </a>
-          </div>
-          <div class="column">
-            <a class="button is-success" @click="submitForm()">
-              投稿
-            </a>
+            <div class="column is-3">
+              <TagInput v-model="articleComputed.tags" />
+            </div>
+            <div class="column">
+              <label class="checkbox">
+                <input type="checkbox" v-model="articleComputed.publish" />
+                公開
+              </label>
+            </div>
+            <div class="column">
+              <a @click="save_article">
+                一時保存
+              </a>
+            </div>
+            <div class="column">
+              <a @click="downloadButton()">
+                <span class="icon">
+                  <i class="kosen-note-icon-folder-download"></i>
+                </span>
+                download
+              </a>
+            </div>
+            <div class="column">
+              <a class="button is-success" @click="submitForm()">
+                保存
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <MarkdownEditor
-      :value="articleComputed.content"
-      @update_props="newVal => (articleComputed.content = newVal)"
-      @save_article="save_article"
-    />
+      <MarkdownEditor
+        :value="articleComputed.content"
+        @update_props="newVal => (articleComputed.content = newVal)"
+        @save_article="submitForm"
+      />
+    </template>
   </div>
 </template>
 
@@ -60,7 +63,9 @@
 import {
   defineComponent,
   ref,
+  reactive,
   computed,
+  onBeforeMount,
   onMounted,
   onActivated,
   onBeforeUpdate
@@ -77,10 +82,9 @@ interface Article {
   title: string;
   tags: string[];
   content: string;
-  category: string;
+  category: null;
   publish: boolean;
 }
-
 export default defineComponent({
   name: "CreateArticle",
   components: {
@@ -93,31 +97,68 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     // const article_content = ref("");
-    const article = ref<Article>(store.state.saved_article);
+    let article = ref();
 
     const articleComputed = computed({
-      get: () => article.value,
+      get: () => article.value ,
       set: value => (article.value = value)
     });
 
     const downloadButton = () => {
-      const blob = new Blob([articleComputed.value.content], {
-        type: "text/plain"
+      if(articleComputed.value){
+        const blob = new Blob([articleComputed.value.content??""], {
+          type: "text/plain"
       });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      if (articleComputed.value.title) {
-        link.download = `${articleComputed.value.title}.md`;
+      if (articleComputed.value?.title) {
+        link.download = `${articleComputed.value?.title}.md`;
       } else {
         link.download = "article.md";
       }
       link.click();
+        }
+    };
+
+    const getArticle = async () => {
+      store.commit("setIsLoading", true);
+
+      await axios
+        .get(
+          `api/v1/articles/articles/authenticated/detail/${route.params.article_id}`
+        )
+        .then(response => {
+
+          articleComputed.value = response.data.data
+
+          console.log(response.data.data);
+          console.log(articleComputed);
+
+
+          // store.commit("removeArticle", article.value?);
+
+          // router.push(`/article/${response.data.id}`);
+        })
+        .catch(error => {
+          console.log(error.response.data);
+          if (error.response.data.data.error == "DoseNotExist") {
+              toast({
+                message: error.response.data.data.error_message,
+                type: "is-danger",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+          }
+        });
+      store.commit("setIsLoading", false);
     };
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
       await axios
-        .post("api/v1/articles/articles/create/", articleComputed.value)
+        .put(`api/v1/articles/articles/update/${route.params.article_id}/`, articleComputed.value)
         .then(response => {
           toast({
             message: "記事が保存されました",
@@ -127,12 +168,11 @@ export default defineComponent({
             duration: 2000,
             position: "bottom-right"
           });
-          store.commit("removeSavedArticle");
+          // store.commit("removeSavedArticle");
 
-          // store.commit("removeArticle", article.value);
-          console.log(response.data.data);
+          // store.commit("removeArticle", article.value?);
 
-          router.push(`/article-detail/${response.data.data.id}`);
+          // router.push(`/article/${response.data.id}`);
         })
         .catch(error => {
           console.log(error.response.data);
@@ -189,21 +229,14 @@ export default defineComponent({
       store.commit("setIsLoading", false);
     };
 
-    const save_article = () => {
-      // console.log("yes");
-      store.commit("setSavedArticle", articleComputed.value);
-    };
-
-    // onMounted(() => {
-    //   console.log(store.state.saved_article.content);
-    //   article.value = store.state.save_article;
-    // });
+    getArticle();
+    onBeforeMount(()=>{});
+    onMounted(() => {});
 
     return {
       articleComputed,
       downloadButton,
       submitForm,
-      save_article
     };
   }
 });

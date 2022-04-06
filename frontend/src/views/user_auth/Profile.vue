@@ -1,7 +1,7 @@
 <template>
   <div class="page-my-account">
     <div class="tabs is-left">
-      <h1 class="title">{{ username }}のアカウントページ</h1>
+      <h1 class="title">{{ usernameComputed }}のプロフィール</h1>
     </div>
     <div class="tabs is-right">
       <ul>
@@ -53,7 +53,7 @@
 
     <div class="columns is-multiline">
       <ArticleBox
-        v-for="article in articles"
+        v-for="article in articlesComputed"
         v-bind:key="article.id"
         v-bind:article="article"
       />
@@ -62,15 +62,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { defineComponent, ref, reactive, computed, onMounted } from "vue";
+import {
+  useRoute,
+  useRouter,
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate
+} from "vue-router";
 import { useStore } from "vuex";
 import { toast } from "bulma-toast";
 import axios from "axios";
 
-import ArticleBox from "@/components/ArticleBox.vue";
+import ArticleBox from "../../components/ArticleBox.vue";
 
 export default defineComponent({
+  name: "Profile",
   components: {
     ArticleBox
   },
@@ -80,12 +86,68 @@ export default defineComponent({
     const store = useStore();
 
     const myself = store.state.user;
-    const username = route.params.username;
 
-    const search_user = async () => {};
+    const articles = ref([]);
+    const articlesComputed = computed({
+      get: () => articles.value,
+      set: value => (articles.value = value)
+    });
+
+    const username = ref("");
+    const usernameComputed = computed({
+      get: () => username.value,
+      set: value => (username.value = value)
+    });
+
+    const search_user = async (username: string | string[]) => {
+      store.commit("setIsLoading", true);
+      const FormData = {
+        username: username
+      };
+      console.log(route.params.username);
+
+      await axios
+        .post(`api/v1/articles/profile/`, FormData)
+        .then(response => {
+          console.log(response.data);
+          usernameComputed.value = response.data.data.profile.username;
+          articlesComputed.value = response.data.data.article_list;
+
+          // username.value = response.data;
+        })
+        .catch(error => {
+          console.log(error.response.data);
+          if (error.response.data.data.error == "DoseNotExist") {
+            toast({
+              message: "この記事は存在していません",
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+            router.push("/");
+          }
+        });
+      store.commit("setIsLoading", false);
+    };
+
+    onBeforeRouteUpdate((to, from, next) => {
+      console.log(to.params.username);
+
+      search_user(to.params.username);
+      next();
+    });
+
+    onMounted(() => {
+      console.log("mounted");
+
+      search_user(route.params.username);
+    });
 
     return {
-      username: username
+      usernameComputed,
+      articlesComputed
     };
   }
 });

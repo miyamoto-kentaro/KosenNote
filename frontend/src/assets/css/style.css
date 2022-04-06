@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'kosen-note';
-  src:  url('../fonts/kosen-note.eot?j4djdc');
-  src:  url('../fonts/kosen-note.eot?j4djdc#iefix') format('embedded-opentype'),
-    url('../fonts/kosen-note.ttf?j4djdc') format('truetype'),
-    url('../fonts/kosen-note.woff?j4djdc') format('woff'),
-    url('../fonts/kosen-note.svg?j4djdc#kosen-note') format('svg');
+  src:  url('../fonts/kosen-note.eot?hjqkq');
+  src:  url('../fonts/kosen-note.eot?hjqkq#iefix') format('embedded-opentype'),
+    url('../fonts/kosen-note.ttf?hjqkq') format('truetype'),
+    url('../fonts/kosen-note.woff?hjqkq') format('woff'),
+    url('../fonts/kosen-note.svg?hjqkq#kosen-note') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -13,7 +13,6 @@
 [class^="kosen-note-icon-"], [class*=" kosen-note-icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'kosen-note' !important;
-  speak: never;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -40,6 +39,12 @@
 .kosen-note-icon-book:before {
   content: "\e91f";
 }
+.kosen-note-icon-file-picture:before {
+  content: "\e927";
+}
+.kosen-note-icon-file-zip:before {
+  content: "\e92b";
+}
 .kosen-note-icon-folder-download:before {
   content: "\e933";
 }
@@ -48,6 +53,12 @@
 }
 .kosen-note-icon-envelop:before {
   content: "\e945";
+}
+.kosen-note-icon-pushpin:before {
+  content: "\e946";
+}
+.kosen-note-icon-compass:before {
+  content: "\e949";
 }
 .kosen-note-icon-printer:before {
   content: "\e954";
@@ -66,6 +77,12 @@
 }
 .kosen-note-icon-user-minus:before {
   content: "\e974";
+}
+.kosen-note-icon-quotes-left:before {
+  content: "\e977";
+}
+.kosen-note-icon-quotes-right:before {
+  content: "\e978";
 }
 .kosen-note-icon-search:before {
   content: "\e986";
@@ -88,6 +105,18 @@
 .kosen-note-icon-list2:before {
   content: "\e9bb";
 }
+.kosen-note-icon-eye:before {
+  content: "\e9ce";
+}
+.kosen-note-icon-eye-blocked:before {
+  content: "\e9d1";
+}
+.kosen-note-icon-bookmark:before {
+  content: "\e9d2";
+}
+.kosen-note-icon-bookmarks:before {
+  content: "\e9d3";
+}
 .kosen-note-icon-heart:before {
   content: "\e9da";
 }
@@ -105,6 +134,15 @@
 }
 .kosen-note-icon-exit:before {
   content: "\ea14";
+}
+.kosen-note-icon-play3:before {
+  content: "\ea1c";
+}
+.kosen-note-icon-play:before {
+  content: "\ea1d";
+}
+.kosen-note-icon-circle-down:before {
+  content: "\ea43";
 }
 .kosen-note-icon-font:before {
   content: "\ea5c";
@@ -133,6 +171,12 @@
 .kosen-note-icon-subscript:before {
   content: "\ea6a";
 }
+.kosen-note-icon-table2:before {
+  content: "\ea71";
+}
+.kosen-note-icon-section:before {
+  content: "\ea76";
+}
 .kosen-note-icon-paragraph-left:before {
   content: "\ea77";
 }
@@ -141,6 +185,12 @@
 }
 .kosen-note-icon-paragraph-right:before {
   content: "\ea79";
+}
+.kosen-note-icon-indent-increase:before {
+  content: "\ea7b";
+}
+.kosen-note-icon-indent-decrease:before {
+  content: "\ea7c";
 }
 .kosen-note-icon-embed2:before {
   content: "\ea80";

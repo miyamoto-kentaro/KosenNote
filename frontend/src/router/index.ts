@@ -1,4 +1,8 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
+import {useStore} from "vuex";
+
+import {store} from "../store";
+
 import Home from "../views/Home.vue";
 import SignInWithEmail from "../views/user_auth/SignInWithEmail.vue";
 import WaitingEmail from "../views/user_auth/WaitingEmail.vue";
@@ -8,6 +12,8 @@ import ResetPasswordSendMail from "../views/user_auth/ResetPasswordSendMail.vue"
 import LogIn from "../views/user_auth/LogIn.vue";
 import Profile from "../views/user_auth/Profile.vue";
 import CreateArticle from "../views/articles/CreateArticle.vue";
+import ArticleDetail from "../views/articles/ArticleDetail.vue";
+import EditArticle from "../views/articles/EditArticle.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,39 +21,50 @@ const routes: Array<RouteRecordRaw> = [
     name: "Home",
     component: Home
   }, {
-    path: "/sign-in/email/send-mail",
+    path: "/sign-in/email/send-mail/",
     name: "SignInWithEmail",
     component: SignInWithEmail
   }, {
-    path: "/sign-in/email/waiting-email",
+    path: "/sign-in/email/waiting-email/",
     name: "WaitingEmail",
     component: WaitingEmail
   }, {
-    path: "/sign-in/email/authentication/:email/:code",
+    path: "/sign-in/email/authentication/:email/:code/",
     name: "EmailAuthentication",
     component: EmailAuthentication
   }, {
-    path: "/reset-password/reset/:uid/:token",
+    path: "/reset-password/reset/:uid/:token/",
     name: "ResetPassword",
     component: ResetPassword
   }, {
-    path: "/reset-password/send-mail",
+    path: "/reset-password/send-mail/",
     name: "ResetPasswordSendMail",
     component: ResetPasswordSendMail
   }, {
-    path: "/log-in",
+    path: "/log-in/",
     name: "LogIn",
     component: LogIn
   }, {
-    path: "/profile/:username",
+    path: "/profile/:username/",
     name: "Profile",
     component: Profile
   }, {
-    path: "/create-article",
+    path: "/create-article/",
     name: "CreateArticle",
-    component: CreateArticle
+    component: CreateArticle,
+    meta: {
+      requireLogin: true
+    }
   }, {
-    path: "/about",
+    path: "/article-detail/:article_id/",
+    name: "ArticleDetail",
+    component: ArticleDetail
+  }, {
+    path: "/edit-article/:article_id/",
+    name: "EditArticle",
+    component: EditArticle
+  }, {
+    path: "/about/",
     name: "About",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -61,6 +78,19 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((record) => record.meta.requireLogin) && !store.state.isAuthenticated) {
+    next({
+      name: "LogIn",
+      query: {
+        to: to.path
+      }
+    });
+  } else {
+    next();
+  }
 });
 
 export default router;

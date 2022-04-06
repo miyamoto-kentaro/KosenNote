@@ -77,6 +77,7 @@ export default defineComponent({
     });
 
     const submitForm = async () => {
+      store.commit("setIsLoading", true);
       try {
         errors = [];
         if (password.value !== password2.value) {
@@ -106,6 +107,7 @@ export default defineComponent({
               });
               // console.log(store.state.user);
               // console.log(response.data)
+              store.commit("setIsLoading", false);
               router.push("/log-in");
             })
             .catch(error => {
@@ -123,6 +125,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 } else if (
                   error.response.data.new_password[0] ==
                   "This password is too short. It must contain at least 8 characters."
@@ -135,6 +138,7 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 }
               } else if (error.response.data.detail) {
                 console.log("detail");
@@ -149,15 +153,19 @@ export default defineComponent({
                     duration: 2000,
                     position: "bottom-right"
                   });
+                  store.commit("setIsLoading", false);
                 }
               }
             });
         } else {
           alert(errors);
+          store.commit("setIsLoading", false);
         }
       } catch (err) {
         console.log(err);
+        store.commit("setIsLoading", false);
       }
+      store.commit("setIsLoading", false);
     };
 
     return {

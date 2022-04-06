@@ -11,48 +11,85 @@ class ArticleSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ["id",
-                  "title",
-                  "tags",
-                  "content",
-                  "create_at",
-                  "update_at",
-                  "author",
-                  "category",
-                  "get_author_name",
-                  "publish"]
+        fields = [
+            "id",
+            "title",
+            "tags",
+            "content",
+            "create_at",
+            "update_at",
+            "author",
+            "category",
+            "get_author_name",
+            "publish"
+            ]
 
+
+class ArticleDetailSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField()
+    class Meta:
+        model = Article
+        fields = [
+            'id',
+            "title",
+            "tags",
+            "content",
+            "create_at",
+            "update_at",
+            "author",
+            "category",
+            "get_author_name",
+            ]
+
+class ArticleAuthenticatedDetailSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField()
+    class Meta:
+        model = Article
+        fields = [
+            "title",
+            "tags",
+            "content",
+            "category",
+            "publish"
+            ]
 
 class CreateArticleSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField()
 
     class Meta:
         model = Article
-        fields = ["title",
-                  "tags",
-                  "content",
-                  "author",
-                  "category",
-                  "publish"]
+        fields = [
+            "id",
+            "title",
+            "tags",
+            "content",
+            "author",
+            "category",
+            "publish"
+            ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ["id",
-                  "title",
-                  "author",
-                  "article",
-                  "comment_to",
-                  "content",
-                  "create_at",
-                  "update_at",
-                  "get_author_name"]
+        fields = [
+            "id",
+            "title",
+            "author",
+            "article",
+            "comment_to",
+            "content",
+            "create_at",
+            "update_at",
+            "get_author_name"
+            ]
 
 
 class GoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goods
-        fields = ["user",
-                  "article", ]
+        fields = [
+            "user",
+            "article"
+            ]
