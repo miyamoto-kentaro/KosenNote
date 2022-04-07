@@ -191,7 +191,8 @@ class ShowProfile(APIView):
                 goods = Goods.objects.filter(user=profile_user.id)
                 goods_article = []
                 for good in goods:
-                    goods_article.append(good.article)
+                    if good.article.publish:
+                        goods_article.append(good.article)
 
                 goods_article_serializer = ArticleSerializer(goods_article, many=True)
                 data = {
@@ -206,12 +207,12 @@ class ShowProfile(APIView):
             else:
                 user_article = profile_user.articles.filter(publish=True).order_by('-id')
                 user_article_serializer = ArticleSerializer(user_article, many=True)
-                goods = Goods.objects.filter(user=profile_user.id).first()
                 goods = Goods.objects.filter(user=profile_user.id)
                 goods_article = []
                 for good in goods:
                     if good.article.publish:
                         goods_article.append(good.article)
+
                 goods_article_serializer = ArticleSerializer(goods_article, many=True)
                 data = {
                     "profile" : {

@@ -146,7 +146,7 @@ export default defineComponent({
               // console.log(response.data)
               Login();
               store.commit("setIsLoading", false);
-              router.push("/sign-in/email/waiting-email");
+              router.push(`/profile/${user.username}`);
             })
             .catch(error => {
               console.log(error.response.data);

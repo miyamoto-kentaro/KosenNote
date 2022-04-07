@@ -90,7 +90,6 @@ export default defineComponent({
       get: () => password.value,
       set: value => (password.value = value)
     });
-
     // async function submitForm() {
     //   alert('called submit')
     // }
@@ -131,9 +130,9 @@ export default defineComponent({
               });
               store.commit("setToken", response.data.auth_token);
               // console.log(store.state.user);
-              // console.log(response.data)
+              // console.log(response.data);
               GetUser();
-              router.push("/sign-in/email/waiting-email");
+              router.push(`/`);
             })
             .catch(error => {
               // console.log(error.response);

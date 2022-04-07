@@ -53,6 +53,21 @@ class PasswordResetEmail(BaseEmailMessage):
         context["url"] = djoser_setting.PASSWORD_RESET_CONFIRM_URL.format(**context)
         return context
 
+# class PasswordResetEmail(BaseEmailMessage):
+#     template_name = "email/custom_password_reset.html"
+
+#     def get_context_data(self):
+#         # PasswordResetEmail can be deleted
+#         context = super().get_context_data()
+
+#         frontend_host = settings.EMAIL_FRONTEND_HOST
+#         user = context.get("user")
+#         context["frontend_host"] = frontend_host
+#         context["uid"] = utils.encode_uid(user.pk)
+#         context["token"] = default_token_generator.make_token(user)
+#         context["url"] = djoser_setting.PASSWORD_RESET_CONFIRM_URL.format(**context)
+        # return context
+
 
 # class PasswordChangedConfirmationEmail(BaseEmailMessage):
 #     template_name = "email/password_changed_confirmation.html"

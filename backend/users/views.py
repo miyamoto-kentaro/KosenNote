@@ -157,9 +157,24 @@ class CertificationPreRegister(APIView):
 
 class UpdateUser(APIView):
     authentication_classes = [TokenAuthentication]
-    def get(self, request, format=None):
-        content = {'user': str(request.user), 'auth': str(request.auth)}
-        return Response(content)
+    def put(self, request, format=None):
+        try:
+            user = User.objects.get(username = request.user)
+            serializer = UserSerializer(user, data=request.data,partial=True)
+            print(request.data)
+            if serializer.is_valid():
+                serializer.update(user, serializer.validated_data)
+                return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CheckView(APIView):
     authentication_classes = [TokenAuthentication, ]
