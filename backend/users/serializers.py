@@ -3,7 +3,7 @@ import uuid
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import PreRegister
+from .models import PreRegister,ChangeEmailTicket
 
 User = get_user_model()
 
@@ -43,3 +43,14 @@ class PreRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         random_authentication_code = uuid.uuid4()
         return PreRegister.objects.create(authentication_code=random_authentication_code,**validated_data)
+
+class ChangeEmailTicketSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ChangeEmailTicket
+        fields = ['id', 'previous_email','email']
+        # read_only_fields = ('created_at')
+    
+    def create(self, validated_data):
+        random_authentication_code = uuid.uuid4()
+        return ChangeEmailTicket.objects.create(authentication_code=random_authentication_code,**validated_data)

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 
-from .models import PreRegister
+from .models import PreRegister, ChangeEmailTicket
 
 
 User = get_user_model()
@@ -12,3 +12,4 @@ User = get_user_model()
 
 admin.site.register(User)
 admin.site.register(PreRegister)
+admin.site.register(ChangeEmailTicket)

@@ -62,9 +62,9 @@
         <a class="panel-block" @click="showUserConfPanelComputed = 1">
           ユーザー名の変更
         </a>
-        <a class="panel-block">
-          メールアドレスの変更
-        </a>
+        <router-link to="/reset-email/send-mail/" class="panel-block"
+          >メールアドレスの変更</router-link
+        >
         <router-link to="/reset-password/send-mail/" class="panel-block"
           >パスワードの変更</router-link
         >

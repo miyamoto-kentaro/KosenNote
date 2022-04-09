@@ -9,6 +9,8 @@ import WaitingEmail from "../views/user_auth/WaitingEmail.vue";
 import EmailAuthentication from "../views/user_auth/EmailAuthentication.vue";
 import ResetPassword from "../views/user_auth/ResetPassword.vue";
 import ResetPasswordSendMail from "../views/user_auth/ResetPasswordSendMail.vue";
+import ResetEmail from "../views/user_auth/ResetEmail.vue";
+import ResetEmailSendMail from "../views/user_auth/ResetEmailSendMail.vue";
 import LogIn from "../views/user_auth/LogIn.vue";
 import Profile from "../views/user_auth/Profile.vue";
 import CreateArticle from "../views/articles/CreateArticle.vue";
@@ -40,6 +42,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/reset-password/send-mail/",
     name: "ResetPasswordSendMail",
     component: ResetPasswordSendMail
+  }, {
+    path: "/change/email/authentication/:email/:code/",
+    name: "ResetEmail",
+    component: ResetEmail
+  }, {
+    path: "/reset-email/send-mail/",
+    name: "ResetEmailSendMail",
+    component: ResetEmailSendMail
   }, {
     path: "/log-in/",
     name: "LogIn",

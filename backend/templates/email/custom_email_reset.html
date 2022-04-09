@@ -1,7 +1,7 @@
-{% block subject %}KosenNoteのパスワードリセット{% endblock %}
+{% block subject %}KosenNoteのメールアドレスリセット{% endblock %}
 {% block html_body %}
   <p>ようこそKosenNoteへ</p>
-  <p>下のURIをクリックしてパスワードをリセットできます</p>
-  <a>{{ frontend_host }}/reset-password/reset{{ url|safe }}
+  <p>下のURIをクリックしてメールアドレスをリセットできます</p>
+  <a>{{ frontend_host }}/reset-email/reset{{ url|safe }}
     <a>
     {% endblock %}

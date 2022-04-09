@@ -36,7 +36,21 @@ class ConfirmationEmail(BaseEmailMessage):
         context["email"] = pre_register.email
         context["code"] = pre_register.authentication_code
         return context
+        
+class ChangeEmailConfirmationEmail(BaseEmailMessage):
+    template_name = "email/change_email_confirmation_email.html"
 
+    def get_context_data(self):
+        # PasswordResetEmail can be deleted
+        context = super().get_context_data()
+
+        change_email_ticket = context.get("change_email_ticket")
+        frontend_host = settings.EMAIL_FRONTEND_HOST
+        context["frontend_host"] = frontend_host
+        context["email"] = change_email_ticket.email
+        context["code"] = change_email_ticket.authentication_code
+        return context
+        
 
 class PasswordResetEmail(BaseEmailMessage):
     template_name = "email/custom_password_reset.html"
@@ -51,6 +65,21 @@ class PasswordResetEmail(BaseEmailMessage):
         context["uid"] = utils.encode_uid(user.pk)
         context["token"] = default_token_generator.make_token(user)
         context["url"] = djoser_setting.PASSWORD_RESET_CONFIRM_URL.format(**context)
+        return context
+
+class EmailResetEmail(BaseEmailMessage):
+    template_name = "email/custom_email_reset.html"
+
+    def get_context_data(self):
+        # PasswordResetEmail can be deleted
+        context = super().get_context_data()
+
+        frontend_host = settings.EMAIL_FRONTEND_HOST
+        user = context.get("user")
+        context["frontend_host"] = frontend_host
+        context["uid"] = utils.encode_uid(user.pk)
+        context["token"] = default_token_generator.make_token(user)
+        context["url"] = djoser_setting.USERNAME_RESET_CONFIRM_URL.format(**context)
         return context
 
 # class PasswordResetEmail(BaseEmailMessage):

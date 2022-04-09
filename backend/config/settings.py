@@ -114,6 +114,7 @@ DJOSER = {
     'SERIALIZERS': {'user': 'users.serializers.UserSerializer'},
     'EMAIL' : {
         'password_reset': 'users.email.PasswordResetEmail',
+        'username_reset': 'users.email.EmailResetEmail'
         },
 }
 

@@ -1,3 +1,4 @@
+import imp
 from django.db.models import Q
 from django.db import IntegrityError
 from django.http import Http404
@@ -21,10 +22,10 @@ from rest_framework.generics import DestroyAPIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from .models import PreRegister
-from .serializers import UserSerializer, PreRegisterSerializer
+from .models import PreRegister, ChangeEmailTicket
+from .serializers import UserSerializer, PreRegisterSerializer, ChangeEmailTicketSerializer
 from .error import AlreadyExists
-from .email import ConfirmationEmail
+from .email import ConfirmationEmail, ChangeEmailConfirmationEmail
 
 
 User = get_user_model()
@@ -176,13 +177,109 @@ class UpdateUser(APIView):
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CheckView(APIView):
-    authentication_classes = [TokenAuthentication, ]
 
-    def get(self, request, *args, **kwargs):
-        return Response({"data": "中身です"})
-    # def post(self, request, format=None):
-    #     user = User.objects.get()
+class CreateChangeEmailTicket(APIView):
+    def exist_user(self,email):
+        try:
+            user = User.objects.get(email=email)
+            raise AlreadyExists
+        except User.DoesNotExist:
+            pass
+    def exist_preuser(self,email):
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise User.DoesNotExist
+
+    
+    def exist_change_email_ticket(self, email):
+        try:
+            change_email_ticket = ChangeEmailTicket.objects.get(email=email)
+            change_email_ticket.delete()
+        except ChangeEmailTicket.DoesNotExist:
+            pass
+    
+
+
+    def post(self, request):
+        # print(request)
+        try:
+            self.exist_user(request.data['email'])
+            self.exist_preuser(request.data['previous_email'])
+            self.exist_change_email_ticket(request.data['email'])
+            serializer = ChangeEmailTicketSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                # from_mail = settings.EMAIL_HOST_USER
+                # # raise ValidationError(from_mail)
+                # send_mail('Subject here', 'Here is the message.', from_mail, ['kentaro.miyamoto1001@gmail.com'], fail_silently=False)
+                change_email_ticket = ChangeEmailTicket.objects.get(email=request.data['email'])
+
+                if change_email_ticket:
+                    context = {"change_email_ticket": change_email_ticket}
+                    to = [change_email_ticket.email]
+                    ChangeEmailConfirmationEmail(self.request, context).send(to)
+
+                return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "error", "data": serializer.data}, status=status.HTTP_400_BAD_REQUEST)
+        except AlreadyExists:
+            data = {
+                "error":"AlreadyExists",
+                "error_message": "そのメールアドレスは既に登録されています",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            data = {
+                "error":"AlreadyExists",
+                "error_message": "そのメールアドレスで登録されているユーザーが存在しません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CertificationChangeEmailTicket(APIView):
+    authentication_classes = [TokenAuthentication]
+    def post(self, request):
+        try:
+            email = request.data['email']
+            authentication_code = request.data['code']
+            change_email_ticket = ChangeEmailTicket.objects.get(email=email)
+            print("auth_code",authentication_code)
+            confirm = change_email_ticket.confirm_code(authentication_code)
+            if confirm=='Success':
+                data = {
+                    "email": change_email_ticket.email,
+                }
+                user = User.objects.get(email=change_email_ticket.previous_email)
+                serializer = UserSerializer(user, data=data,partial=True)
+                if serializer.is_valid():
+                    serializer.update(user, serializer.validated_data)
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            elif confirm=='FailureAuthentication':
+                data = {
+                    "error":"FailureAuthentication",
+                    "error_message": "認証コードが違います。もう一度、メールを確認してください。",
+                }
+                return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+            elif confirm=='Expired':
+                data = {
+                    "error":"Expired",
+                    "error_message": "認証コードの有効期限が切れました。再発行してください。",
+                }
+                return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+        except ChangeEmailTicket.DoesNotExist:
+            # print('acount dose not exist')
+            data = {
+                "error":"DoesNotExist",
+                "error_message": "このメールアドレスに確認コードを発送していません。",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class UserEmailAlreadyExists(APIView):
