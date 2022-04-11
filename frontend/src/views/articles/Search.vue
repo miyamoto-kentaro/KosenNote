@@ -1,24 +1,27 @@
 <template>
-  <div class="home">
+  <div class="page-search">
     <div class="columns is-multiline">
+      <div class="column is-12">
+        <h1 class="title">Search</h1>
+      </div>
+
       <ArticleBox
-        v-for="article in latestArticleListComputed"
+        v-for="article in articleListComputed"
         v-bind:key="article.id"
         v-bind:article="article"
       />
     </div>
-    <!-- <MrkdownCompiler /> -->
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, onBeforeMount } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 import { useStore } from "vuex";
 import { toast } from "bulma-toast";
 import axios from "axios";
 
-import ArticleBox from "../components/ArticleBox.vue";
+import ArticleBox from "../../components/ArticleBox.vue";
 // import { values } from "lodash";
 export default defineComponent({
   name: "Home",
@@ -30,19 +33,23 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
 
-    const latestArticleList = ref("");
-    const latestArticleListComputed = computed({
-      get: () => latestArticleList.value,
-      set: value => (latestArticleList.value = value)
+    const articleList = ref<object[]>([]);
+    const articleListComputed = computed({
+      get: () => articleList.value,
+      set: value => (articleList.value = value)
     });
 
-    const get_article_list = async () => {
+    const get_article_list = async (query: string | string[]) => {
       store.commit("setIsLoading", true);
 
+      console.log(query);
+
       await axios
-        .get(`api/v1/articles/articles/latest/list/`)
+        .get(`api/v1/articles/articles/search/${query}`)
         .then(response => {
-          latestArticleList.value = response.data;
+          console.log(response.data);
+
+          articleListComputed.value = response.data.data;
         })
         .catch(error => {
           console.log(error.response.data);
@@ -60,16 +67,19 @@ export default defineComponent({
         });
       store.commit("setIsLoading", false);
     };
+    onMounted(() => {
+      get_article_list(route.params.query);
+    });
 
-    get_article_list();
-    // onBeforeMount(() => {
-    // });
+    onBeforeRouteUpdate((to, from, next) => {
+      get_article_list(to.params.query);
+
+      next();
+    });
 
     return {
-      latestArticleListComputed
+      articleListComputed
     };
   }
 });
 </script>
-
-<style scoped></style>

@@ -1,24 +1,37 @@
 <template>
   <div class="page-my-account">
-    <div class="tabs is-left">
-      <h1 class="title">{{ usernameComputed }}のプロフィール</h1>
+    <div class="is-left">
+      <h1 class="title">{{ usernameComputed }}</h1>
     </div>
-    <div class="tabs is-right">
+    <div class="tag is-left">
+      <a class="tag" @click="showPanelComputed = 3">
+        フォロー {{ follow_toComputed.length }}
+      </a>
+      <a class="tag" @click="showPanelComputed = 4">
+        フォロワー {{ followerComputed.length }}
+      </a>
+    </div>
+    <div class="tabs  is-right">
       <ul>
         <li :class="{ 'is-active': showPanelComputed == 0 }">
-          <a class="has-text-info" @click="showPanelComputed = 0"
-            >投稿した記事</a
+          <a class="has-text-info" @click="showPanelComputed = 0">
+            <span class="icon"> <i class="icon kosen-note-icon-book"></i> </span
+            >記事</a
           >
         </li>
         <!-- <li><a>Music</a></li>
         <li><a>Videos</a></li> -->
         <li :class="{ 'is-active': showPanelComputed == 1 }">
-          <a class="has-text-info" @click="showPanelComputed = 1">
-            いいねした記事
+          <a class="has-text-info" @click="showPanelComputed = 1"
+            ><span class="icon">
+              <i class="icon kosen-note-icon-heart"></i>
+            </span>
+
+            いいね
           </a>
         </li>
 
-        <li>
+        <li v-if="ItmeComputed == true">
           <a
             class="show-modal has-text-info"
             data-target="my-modal"
@@ -26,11 +39,27 @@
             >アカウント設定</a
           >
         </li>
+        <li v-else>
+          <a
+            class="show-modal has-text-info"
+            data-target="my-modal"
+            @click="follow"
+            v-if="onfollowComputed == false"
+            >フォロー</a
+          >
+          <a
+            class="show-modal has-text-danger"
+            data-target="my-modal"
+            @click="follow"
+            v-if="onfollowComputed == true"
+            >フォローを外す</a
+          >
+        </li>
       </ul>
     </div>
 
     <div
-      class="columns is-multiline panel-1"
+      class="columns is-multiline panel-0"
       :class="{ 'dont-show': showPanelComputed != 0 }"
     >
       <ArticleBox
@@ -51,7 +80,7 @@
       />
     </div>
 
-    <div class="panel-1" :class="{ 'dont-show': showPanelComputed != 2 }">
+    <div class="panel-2" :class="{ 'dont-show': showPanelComputed != 2 }">
       <nav class="panel">
         <p class="panel-heading">
           アカウント設定
@@ -73,6 +102,56 @@
           @click="showUserConfPanelComputed = 3"
         >
           ログアウト
+        </a>
+      </nav>
+    </div>
+    <div
+      class="columns is-multiline panel-3"
+      :class="{ 'dont-show': showPanelComputed != 3 }"
+    >
+      <nav class="panel">
+        <p class="panel-heading">フォロー {{ follow_toComputed.length }}</p>
+        <!-- <div class="panel-block">
+          <p class="control has-icons-left">
+            <input class="input" type="text" placeholder="Search" />
+            <span class="icon is-left">
+              <i class="fas kosen-note-icon-search" aria-hidden="true"></i>
+            </span>
+          </p>
+        </div> -->
+        <a
+          class="panel-block"
+          v-for="follow_to_user in follow_toComputed"
+          v-bind:key="follow_to_user.id"
+          v-bind:follow_to_user="follow_to_user"
+          @click="push_to_profile(follow_to_user.get_followed_user_name)"
+        >
+          {{ follow_to_user.get_followed_user_name }}
+        </a>
+      </nav>
+    </div>
+    <div
+      class="columns is-multiline panel-1"
+      :class="{ 'dont-show': showPanelComputed != 4 }"
+    >
+      <nav class="panel">
+        <p class="panel-heading">フォロワー {{ followerComputed.length }}</p>
+        <!-- <div class="panel-block">
+          <p class="control has-icons-left">
+            <input class="input" type="text" placeholder="Search" />
+            <span class="icon is-left">
+              <i class="fas kosen-note-icon-search" aria-hidden="true"></i>
+            </span>
+          </p>
+        </div> -->
+        <a
+          class="panel-block"
+          v-for="follower in followerComputed"
+          v-bind:key="follower.id"
+          v-bind:follower="follower"
+          @click="push_to_profile(follower.get_follower_name)"
+        >
+          {{ follower.get_follower_name }}
         </a>
       </nav>
     </div>
@@ -179,17 +258,23 @@ export default defineComponent({
       set: value => (showUserConfPanel.value = value)
     });
 
+    const Itme = ref<boolean>(false);
+    const ItmeComputed = computed({
+      get: () => Itme.value,
+      set: value => (Itme.value = value)
+    });
+
     // const SwitchshowPanel = (num: number) => {
     //   showPanelComputed.value = num;
     // };
 
-    const articles = ref([]);
+    const articles = ref<object[]>([]);
     const articlesComputed = computed({
       get: () => articles.value,
       set: value => (articles.value = value)
     });
 
-    const goods = ref([]);
+    const goods = ref<object[]>([]);
     const goodsComputed = computed({
       get: () => goods.value,
       set: value => (goods.value = value)
@@ -201,6 +286,23 @@ export default defineComponent({
       set: value => (username.value = value)
     });
 
+    const onfollow = ref<boolean>(false);
+    const onfollowComputed = computed({
+      get: () => onfollow.value,
+      set: value => (onfollow.value = value)
+    });
+
+    const follower = ref<object[]>([]);
+    const followerComputed = computed({
+      get: () => follower.value,
+      set: value => (follower.value = value)
+    });
+    const follow_to = ref<object[]>([]);
+    const follow_toComputed = computed({
+      get: () => follow_to.value,
+      set: value => (follow_to.value = value)
+    });
+
     const next_username = ref<string>("");
     const next_usernameComputed = computed({
       get: () => next_username.value,
@@ -209,18 +311,51 @@ export default defineComponent({
 
     const search_user = async (username: string | string[]) => {
       store.commit("setIsLoading", true);
-      const FormData = {
-        username: username
-      };
-      console.log(route.params.username);
+      console.log("arg_username", username);
 
       await axios
-        .post(`api/v1/articles/profile/`, FormData)
+        .get(`api/v1/articles/profile/${username}`)
         .then(response => {
           console.log(response.data);
+          console.log("reloading");
+
           usernameComputed.value = response.data.data.profile.username;
+          console.log(response.data.data.profile.username);
+
           articlesComputed.value = response.data.data.article_list;
           goodsComputed.value = response.data.data.goods;
+          onfollowComputed.value = response.data.data.profile.follow;
+          followerComputed.value = response.data.data.profile.follower;
+          follow_toComputed.value = response.data.data.profile.follow_to;
+
+          console.log("usernameComputed:", usernameComputed.value);
+
+          if (usernameComputed.value == store.state.user.username) {
+            console.log("yse");
+
+            ItmeComputed.value = true;
+          } else {
+            ItmeComputed.value = false;
+          }
+        })
+        .catch(error => {
+          console.log(error.response.data);
+          if (error.response.data.data.error == "DoseNotExist") {
+            toast({
+              message: "この記事は存在していません",
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+            router.push("/");
+          }
+        });
+      await axios
+        .get(`api/v1/users/users/${usernameComputed.value}/following/`)
+        .then(response => {
+          console.log(response.data);
 
           // username.value = response.data;
         })
@@ -237,6 +372,7 @@ export default defineComponent({
             });
             router.push("/");
           }
+          store.commit("setIsLoading", false);
         });
       store.commit("setIsLoading", false);
     };
@@ -297,26 +433,125 @@ export default defineComponent({
       store.commit("setIsLoading", false);
     };
 
-    const logout = () => {
-      store.commit("setIsLoading", true);
-      store.commit("removeToken");
-      store.commit("removeUser");
+    const follow = async () => {
+      if (onfollowComputed.value == true) {
+        await axios
+          .delete(`api/v1/users/users/${usernameComputed.value}/following/`)
+          .then(response => {
+            console.log(response.data);
+            onfollowComputed.value = false;
+            toast({
+              message: `フォローを外しました`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          })
+          .catch(error => {
+            console.log(error.response.data);
+            if (error.response.data.data.error == "DoseNotExist") {
+              toast({
+                message: "このユーザーは存在していません",
+                type: "is-danger",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+              router.push("/");
+            } else if (error.response.data.data.username) {
+              if (
+                error.response.data.data.username[0] ==
+                ["A user with that username already exists."]
+              ) {
+                toast({
+                  message: "このユーザー名は既に使用されています",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+              }
+            }
+          });
+      } else {
+        await axios
+          .post(`api/v1/users/users/${usernameComputed.value}/following/`)
+          .then(response => {
+            console.log(response.data);
+            onfollowComputed.value = true;
+
+            toast({
+              message: `フォローしました`,
+              type: "is-success",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          })
+          .catch(error => {
+            console.log(error.response.data);
+            if (error.response.data.data.error == "DoseNotExist") {
+              toast({
+                message: "このユーザーは存在していません",
+                type: "is-danger",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+              router.push("/");
+            } else if (error.response.data.data.username) {
+              if (
+                error.response.data.data.username[0] ==
+                ["A user with that username already exists."]
+              ) {
+                toast({
+                  message: "このユーザー名は既に使用されています",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+              }
+            }
+          });
+      }
+
       store.commit("setIsLoading", false);
+    };
+
+    const logout = () => {
+      store.dispatch("InitializationStore");
       router.push("/");
     };
 
-    onBeforeRouteUpdate((to, from, next) => {
-      console.log(to.params.username);
+    const push_to_profile = (username: string) => {
+      router.push(`/profile/${username}/`);
+    };
 
+    onBeforeRouteUpdate((to, from, next) => {
+      console.log("param:", to.params.username);
+      console.log("router update");
+
+      showPanelComputed.value = 0;
       search_user(to.params.username);
+      console.log("user:", usernameComputed.value);
+
       next();
     });
 
+    search_user(route.params.username);
     onMounted(() => {
       console.log("mounted");
 
-      search_user(route.params.username);
       console.log(showPanelComputed.value);
+      console.log(route.params.username);
     });
 
     return {
@@ -326,8 +561,14 @@ export default defineComponent({
       showPanelComputed,
       showUserConfPanelComputed,
       logout,
+      follow,
       next_usernameComputed,
-      update_username
+      update_username,
+      ItmeComputed,
+      onfollowComputed,
+      follow_toComputed,
+      followerComputed,
+      push_to_profile
     };
   }
 });

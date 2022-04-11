@@ -1,44 +1,50 @@
 <template>
   <div class="sign-in-with-email">
-    <div class="columns">
-      <div class="column is-4 is-offset-4">
-        <h1 class="title">Sign up</h1>
-
-        <form @submit.prevent="submitForm">
-          <div class="field">
-            <label>Email Address</label>
-            <div class="control">
-              <input type="text" class="input" v-model="emailComputed" />
+    <section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <h3 class="title has-text-black">SignIn</h3>
+            <hr class="sign-in-hr" />
+            <p class="subtitle has-text-black">認証メールを送ります</p>
+            <div class="box">
+              <form @submit.prevent="submitForm">
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="email"
+                      placeholder="Your Email"
+                      autofocus=""
+                      v-model="emailComputed"
+                    />
+                  </div>
+                </div>
+                <template v-if="isLoading">
+                  <a class="button is-block is-info is-large is-fullwidth">
+                    メールを送る
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </a>
+                </template>
+                <template v-else>
+                  <button class="button is-block is-info is-large is-fullwidth">
+                    メールを送る
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </button>
+                </template>
+              </form>
             </div>
+            <p class="has-text-grey">
+              <router-link to="/log-in">ログイン</router-link>
+              &nbsp;·&nbsp;
+              <router-link to="/reset-password/send-mail"
+                >パスワードの変更</router-link
+              >
+            </p>
           </div>
-
-          <div class="notification is-danger" v-if="errors.length">
-            <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
-          </div>
-
-          <div class="field">
-            <template v-if="isLoading">
-              <div class="control">
-                <a class="button is-dark">
-                  メールを送る
-                </a>
-              </div>
-            </template>
-            <template v-else>
-              <div class="control">
-                <button class="button is-dark">
-                  メールを送る
-                </button>
-              </div>
-            </template>
-          </div>
-
-          <hr />
-
-          Or <router-link to="/log-in">ログイン</router-link>
-        </form>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -50,15 +56,21 @@ import { toast } from "bulma-toast";
 import axios from "axios";
 
 export default defineComponent({
+  name: "SignInWithEmail",
   setup() {
+    document.title = "SignInWithEmail | KosenNote";
     // data
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
 
-    let errors: string[] = [];
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
 
-    const email = ref("");
+    const email = ref<string>("");
 
     const emailComputed = computed({
       get: () => email.value,
@@ -71,16 +83,16 @@ export default defineComponent({
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
+      errorsCompute.value = [];
       try {
-        errors = [];
-        if (email.value === "") {
-          errors.push("メールアドレスを入力してください");
+        if (!email.value) {
+          errorsCompute.value.push("メールアドレスを入力してください");
         }
-        if (!errors.length) {
+        if (!errorsCompute.value.length) {
           const formData = {
             email: email.value
           };
-          store.commit("removeToken");
+          store.dispatch("InitializationStore");
 
           await axios
             .post("/api/v1/users/users/email/pre_register/create", formData)
@@ -113,6 +125,17 @@ export default defineComponent({
                 position: "bottom-right"
               });
             });
+        } else {
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
         }
       } catch (err) {
         alert("error");

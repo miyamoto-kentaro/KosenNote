@@ -1,3 +1,4 @@
+import imp
 from urllib import request
 from django.db.models import Q
 from django.http import Http404
@@ -15,6 +16,9 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.generics import DestroyAPIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+
+from users.models import Following
+from users.serializers import FollowingSerializer
 
 from .models import Category, Article, Goods, Comment
 from .serializers import ArticleSerializer, ArticleDetailSerializer, CreateArticleSerializer, GoodSerializer, CommentSerializer, ArticleAuthenticatedDetailSerializer
@@ -118,11 +122,11 @@ class ArticleDetail(APIView):
     def get_object(self, article_id):
         try:
             article = Article.objects.get(pk=article_id)
-            user = User.objects.get(username = self.request.user)
-            if article.author == user or article.publish:
+            if article.get_author_name() == self.request.user or article.publish:
                 return article
             else:
                 raise Http404
+
         except Article.DoesNotExist:
             raise Http404
 
@@ -175,15 +179,11 @@ class ArticleAuthenticatedDetail(APIView):
 
 class ShowProfile(APIView):
     authentication_classes = [TokenAuthentication]
-    def post(self, request):
+    def get(self,request,username):
         try:
             print(request.auth)
-            if(request.auth):
-                myuser = User.objects.get(username=request.user)
-            else:
-                myuser = None
+            myuser = User.objects.get(username=request.user)
 
-            username = request.data['username']
             profile_user = User.objects.get(username=username)
             if(myuser==profile_user):
                 user_article = profile_user.articles.order_by('-id').all()
@@ -193,11 +193,18 @@ class ShowProfile(APIView):
                 for good in goods:
                     if good.article.publish:
                         goods_article.append(good.article)
-
+                
                 goods_article_serializer = ArticleSerializer(goods_article, many=True)
+
+                follower = Following.objects.filter(followed_user=profile_user.id)
+                follower_serializer = FollowingSerializer(follower, many=True)
+                follow_to = Following.objects.filter(follower=profile_user.id)
+                follow_to_serializer = FollowingSerializer(follow_to, many=True)
                 data = {
                     "profile" : {
                         "username":profile_user.username,
+                        "follower":follower_serializer.data,
+                        "follow_to":follow_to_serializer.data,
                         "follow":False,
                         },
                     "article_list": user_article_serializer.data,
@@ -214,10 +221,23 @@ class ShowProfile(APIView):
                         goods_article.append(good.article)
 
                 goods_article_serializer = ArticleSerializer(goods_article, many=True)
+                follower = Following.objects.filter(followed_user=profile_user.id)
+                follower_serializer = FollowingSerializer(follower, many=True)
+                follow_to = Following.objects.filter(follower=profile_user.id)
+                follow_to_serializer = FollowingSerializer(follow_to, many=True)
+
+
+                myuser_follow_user = follower.filter(follower=myuser.id)
+                if myuser_follow_user:
+                    follow = True
+                else:
+                    follow = False
                 data = {
                     "profile" : {
                         "username":profile_user.username,
-                        "follow":False,
+                        "follower":follower_serializer.data,
+                        "follow_to":follow_to_serializer.data,
+                        "follow":follow,
                         },
                     "article_list": user_article_serializer.data,
                     "goods" : goods_article_serializer.data
@@ -228,6 +248,30 @@ class ShowProfile(APIView):
             data = {
                 "error":"DoseNotExist",
                 "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+class SearchArticle(APIView):
+    def get(self, request, query, format=None):
+        try:
+            if query:
+                article = Article.objects.filter(publish=True).filter(
+                    Q(title__icontains=query) | Q(content__icontains=query) | Q(tags__name__in=[query])).distinct("id")
+                serializer = ArticleSerializer(article, many=True)
+                return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "error":"DoseNotExist",
+                    "error_message": "検索ワードを入力してください",
+                }
+                return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+                # serializer = SlimArticleSerializer(articles, many=True)
+                return Response(serializer.data)
+        except Article.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "この記事は存在していません",
             }
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
 

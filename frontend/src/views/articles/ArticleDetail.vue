@@ -211,27 +211,29 @@ export default defineComponent({
       const FormData = {
         article_id: article_id
       };
-      await axios
-        .post("api/v1/articles/goods/already_exists/", FormData)
-        .then(response => {
-          console.log(response.data.data.already_good);
+      if (store.state.isAuthenticated) {
+        await axios
+          .post("api/v1/articles/goods/already_exists/", FormData)
+          .then(response => {
+            console.log(response.data.data.already_good);
 
-          isGoodComputed.value = response.data.data.already_good;
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
-            toast({
-              message: "この記事は存在していません",
-              type: "is-danger",
-              dismissible: true,
-              pauseOnHover: true,
-              duration: 2000,
-              position: "bottom-right"
-            });
-            router.push("/");
-          }
-        });
+            isGoodComputed.value = response.data.data.already_good;
+          })
+          .catch(error => {
+            console.log(error.response.data);
+            if (error.response.data.data.error == "DoseNotExist") {
+              toast({
+                message: "この記事は存在していません",
+                type: "is-danger",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+              router.push("/");
+            }
+          });
+      }
       store.commit("setIsLoading", false);
     };
 
@@ -285,7 +287,7 @@ export default defineComponent({
             console.log(error.response.data);
             if (error.response.data.data.error == "DoseNotExist") {
               toast({
-                message: "この記事は存在していません",
+                message: `${error.response.data.data.error_message}`,
                 type: "is-danger",
                 dismissible: true,
                 pauseOnHover: true,
@@ -310,7 +312,7 @@ export default defineComponent({
             console.log(error.response.data);
             if (error.response.data.data.error == "DoseNotExist") {
               toast({
-                message: "この記事は存在していません",
+                message: `${error.response.data.data.error_message}`,
                 type: "is-danger",
                 dismissible: true,
                 pauseOnHover: true,
@@ -318,8 +320,6 @@ export default defineComponent({
                 position: "bottom-right"
               });
               store.commit("setIsLoading", false);
-
-              router.push("/");
             } else if ((error.response.data.data.error = "AlreadyExists")) {
               isGoodComputed.value = true;
             }

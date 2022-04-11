@@ -30,7 +30,7 @@ export default defineComponent({
             code: code
           };
 
-          store.commit("removeToken");
+          store.dispatch("InitializationStore");
           console.log(formData);
 
           await axios

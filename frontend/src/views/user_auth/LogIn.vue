@@ -1,58 +1,62 @@
 <template>
   <div class="log-in">
-    <div class="columns">
-      <div class="column is-4 is-offset-4">
-        <h1 class="title">Log in</h1>
+    <section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <h3 class="title has-text-black">Login</h3>
+            <hr class="login-hr" />
+            <p class="subtitle has-text-black">ログインしてください</p>
+            <div class="box">
+              <form @submit.prevent="submitForm">
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="email"
+                      placeholder="Your Email"
+                      autofocus=""
+                      v-model="emailComputed"
+                    />
+                  </div>
+                </div>
 
-        <form @submit.prevent="submitForm">
-          <div class="field">
-            <label>Email Address</label>
-            <div class="control">
-              <input type="text" class="input" v-model="emailComputed" />
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="password"
+                      placeholder="Your Password"
+                      v-model="passwordComputed"
+                    />
+                  </div>
+                </div>
+
+                <template v-if="isLoading">
+                  <a class="button is-block is-info is-large is-fullwidth">
+                    Login <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </a>
+                </template>
+                <template v-else>
+                  <button class="button is-block is-info is-large is-fullwidth">
+                    Login <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </button>
+                </template>
+              </form>
             </div>
+            <p class="has-text-grey">
+              <router-link to="/sign-in/email/send-mail"
+                >サインイン</router-link
+              >
+              &nbsp;·&nbsp;
+              <router-link to="/reset-password/send-mail"
+                >パスワードの変更</router-link
+              >
+            </p>
           </div>
-
-          <div class="field">
-            <label>Password</label>
-            <div class="control">
-              <input type="password" class="input" v-model="passwordComputed" />
-            </div>
-          </div>
-
-          <div class="notification is-danger" v-if="errors.length">
-            <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
-          </div>
-
-          <div class="field">
-            <template v-if="isLoading">
-              <div class="control">
-                <a class="button is-dark">
-                  ログイン
-                </a>
-              </div>
-            </template>
-            <template v-else>
-              <div class="control">
-                <button class="button is-dark">
-                  ログイン
-                </button>
-              </div>
-            </template>
-          </div>
-
-          <hr />
-
-          Or <router-link to="/sign-in/email/send-mail">サインイン</router-link>
-
-          <hr />
-
-          Or
-          <router-link to="/reset-password/send-mail"
-            >パスワードの変更</router-link
-          >
-        </form>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -69,70 +73,61 @@ interface User {
 }
 
 export default defineComponent({
+  name: "LogIn",
   setup() {
+    document.title = "LogIn | KosenNote";
     // data
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
 
-    let errors: string[] = [];
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
 
-    const email = ref("");
-
+    const email = ref<string>("");
     const emailComputed = computed({
       get: () => email.value,
       set: value => (email.value = value)
     });
 
-    const password = ref("");
-
+    const password = ref<string>("");
     const passwordComputed = computed({
       get: () => password.value,
       set: value => (password.value = value)
     });
-    // async function submitForm() {
-    //   alert('called submit')
-    // }
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
       console.log(store.state.isLoading);
+      errorsCompute.value = [];
       try {
-        errors = [];
-        // if (email.value === "") {
-        //   toast({
-        //     message: "メールアドレスを入力してください",
-        //     type: "is-danger",
-        //     dismissible: true,
-        //     pauseOnHover: true,
-        //     duration: 2000,
-        //     position: "bottom-right"
-        //   });
-        // }
-        if (!errors.length) {
+        // バリデーション
+        if (!emailComputed.value) {
+          errorsCompute.value.push("メールアドレスを入力してください");
+        }
+        if (!passwordComputed.value) {
+          errorsCompute.value.push("パスワードを入力してください");
+        }
+
+        if (!errorsCompute.value.length) {
           const formData = {
             email: email.value,
             password: password.value
           };
 
-          store.commit("removeToken");
+          store.dispatch("InitializationStore");
           await axios
             .post("/api/v1/token/login", formData)
             .then(response => {
-              // console.log(response.data);
-              toast({
-                message: "ログインできました",
-                type: "is-success",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
+              console.log(response.data.auth_token);
+
               store.commit("setToken", response.data.auth_token);
-              // console.log(store.state.user);
-              // console.log(response.data);
+              console.log("yes");
+
               GetUser();
-              router.push(`/`);
             })
             .catch(error => {
               // console.log(error.response);
@@ -171,7 +166,7 @@ export default defineComponent({
                   ["Unable to log in with provided credentials."]
                 ) {
                   toast({
-                    message: "パスワードが間違っています",
+                    message: "パスワードかメールアドレスが間違っています",
                     type: "is-danger",
                     dismissible: true,
                     pauseOnHover: true,
@@ -181,31 +176,70 @@ export default defineComponent({
                 }
               }
             });
+        } else {
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
         }
       } catch (err) {
-        alert("error");
+        console.log(err);
+
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
+        });
+        router.push("/");
       }
       store.commit("setIsLoading", false);
     };
 
     const GetUser = async () => {
-      // console.log(axios.defaults.headers.common["Authorization"]);
+      console.log("get user");
       await axios
         .get("/api/v1/users/me")
         .then(response => {
+          console.log(response);
+
           const user: User = {
             username: response.data.username,
             email: response.data.email
           };
+
           store.commit("setUser", user);
-          // console.log(response.data);
-          // console.log("user:", store.state.user);
+
+          toast({
+            message: "ログインできました",
+            type: "is-success",
+            dismissible: true,
+            pauseOnHover: true,
+            duration: 2000,
+            position: "bottom-right"
+          });
+
+          router.push(`/profile/${user.username}`);
         })
         .catch(error => {
-          // console.log(JSON.stringify(error));
-          console.log(error.data);
+          toast({
+            message: "予期せぬエラー",
+            type: "is-danger",
+            dismissible: true,
+            pauseOnHover: true,
+            duration: 2000,
+            position: "bottom-right"
+          });
+          router.push("/");
         });
-      // store.commit("setIsLoading", false);
     };
 
     return {

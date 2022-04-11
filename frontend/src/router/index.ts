@@ -4,6 +4,8 @@ import {useStore} from "vuex";
 import {store} from "../store";
 
 import Home from "../views/Home.vue";
+import Sample from "../views/user_auth/Sample.vue";
+
 import SignInWithEmail from "../views/user_auth/SignInWithEmail.vue";
 import WaitingEmail from "../views/user_auth/WaitingEmail.vue";
 import EmailAuthentication from "../views/user_auth/EmailAuthentication.vue";
@@ -16,6 +18,7 @@ import Profile from "../views/user_auth/Profile.vue";
 import CreateArticle from "../views/articles/CreateArticle.vue";
 import ArticleDetail from "../views/articles/ArticleDetail.vue";
 import EditArticle from "../views/articles/EditArticle.vue";
+import Search from "../views/articles/Search.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -57,7 +60,10 @@ const routes: Array<RouteRecordRaw> = [
   }, {
     path: "/profile/:username/",
     name: "Profile",
-    component: Profile
+    component: Profile,
+    meta: {
+      requireLogin: true
+    }
   }, {
     path: "/create-article/",
     name: "CreateArticle",
@@ -72,16 +78,14 @@ const routes: Array<RouteRecordRaw> = [
   }, {
     path: "/edit-article/:article_id/",
     name: "EditArticle",
-    component: EditArticle
+    component: EditArticle,
+    meta: {
+      requireLogin: true
+    }
   }, {
-    path: "/about/",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import (
-    /* webpackChunkName: "about" */
-    "../views/About.vue")
+    path: "/search-article/:query/",
+    name: "Search",
+    component: Search
   }
 ];
 

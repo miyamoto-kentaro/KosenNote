@@ -22,22 +22,26 @@
             <TagInput v-model="articleComputed.tags" />
           </div>
           <div class="column">
-            <label class="checkbox">
-              <input type="checkbox" v-model="articleComputed.publish" />
-              公開
+            <label
+              class="checkbox"
+              @click="articleComputed.publish = !articleComputed.publish"
+            >
+              <!-- <input type="checkbox" v-model="articleComputed.publish" /> -->
+              <span class="icon">
+                <i
+                  class="icon"
+                  :class="[
+                    articleComputed.publish
+                      ? 'kosen-note-icon-unlocked'
+                      : 'kosen-note-icon-lock'
+                  ]"
+                ></i>
+              </span>
             </label>
-          </div>
-          <div class="column">
-            <a @click="save_article">
-              一時保存
-            </a>
-          </div>
-          <div class="column">
             <a @click="downloadButton()">
               <span class="icon">
                 <i class="kosen-note-icon-folder-download"></i>
               </span>
-              download
             </a>
           </div>
           <div class="column">

@@ -32,12 +32,9 @@
               v-bind:key="tag.id"
               v-bind:article="article"
             >
-              <router-link
-                v-bind:to="{ path: 'search', query: { query: tag } }"
-                style="color:black"
-              >
+              <a @click="push_search(tag)">
                 {{ tag }}
-              </router-link></span
+              </a></span
             >
           </p>
         </div>
@@ -111,10 +108,16 @@ export default defineComponent({
         return "/";
       }
     });
+
+    const push_search = (tag: string) => {
+      router.push(`/search-article/${tag}`);
+    };
+
     return {
       props,
       showArticleComputed,
-      author_profile
+      author_profile,
+      push_search
     };
   }
 });

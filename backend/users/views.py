@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.utils import tree
 from django.utils.translation import ugettext_lazy as _
+from requests import delete
 
 from rest_framework import status
 from rest_framework import authentication
@@ -22,8 +23,8 @@ from rest_framework.generics import DestroyAPIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from .models import PreRegister, ChangeEmailTicket
-from .serializers import UserSerializer, PreRegisterSerializer, ChangeEmailTicketSerializer
+from .models import Following, PreRegister, ChangeEmailTicket
+from .serializers import UserSerializer, PreRegisterSerializer, ChangeEmailTicketSerializer, FollowingSerializer
 from .error import AlreadyExists
 from .email import ConfirmationEmail, ChangeEmailConfirmationEmail
 
@@ -278,6 +279,81 @@ class CertificationChangeEmailTicket(APIView):
                 "error_message": "このメールアドレスに確認コードを発送していません。",
             }
             return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FollowingView(APIView):
+    authentication_classes = [TokenAuthentication]
+    
+    def get(self, request, username ,format=None):
+        try:
+            # user = User.objects.get(username = request.user)
+            user = User.objects.get(username = username)
+            following = Following.objects.filter(follower = user.id)
+            serializer = FollowingSerializer(following, many=True)
+            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+        except Following.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request, username ,format=None):
+        try:
+            follower = User.objects.get(username = request.user)
+            followed_user = User.objects.get(username = username)
+            data = {
+                'follower': follower.id,
+                'followed_user': followed_user.id
+            }
+            serializer = FollowingSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+        except Following.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self,request,username, format=None):
+        try:
+            follower = User.objects.get(username = request.user)
+            followed_user = User.objects.get(username = username)
+            following = Following.objects.filter(follower=follower.id, followed_user=followed_user.id)
+            following.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+        except Following.DoesNotExist:
+            data = {
+                "error":"DoseNotExist",
+                "error_message": "このユーザーは存在していません",
+            }
+            return Response({"status": "error", "data": data}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 

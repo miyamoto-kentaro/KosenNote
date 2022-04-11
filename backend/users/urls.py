@@ -18,6 +18,7 @@ urlpatterns = [
     # User情報を取得
     path('me', views.UpdateUser.as_view()),
     path('update/', views.UpdateUser.as_view()),
+    path('<str:username>/following/', views.FollowingView.as_view()),
 
     # emailとusernameでUserを検索して、重複を確認するAPI
     path('already_exists/email', views.UserEmailAlreadyExists.as_view()),

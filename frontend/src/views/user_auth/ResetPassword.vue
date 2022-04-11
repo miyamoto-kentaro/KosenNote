@@ -91,7 +91,7 @@ export default defineComponent({
             new_password: password.value
           };
 
-          store.commit("removeToken");
+          store.dispatch("InitializationStore");
           console.log(formData);
 
           await axios

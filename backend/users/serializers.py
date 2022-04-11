@@ -3,7 +3,7 @@ import uuid
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import PreRegister,ChangeEmailTicket
+from .models import PreRegister,ChangeEmailTicket, Following
 
 User = get_user_model()
 
@@ -54,3 +54,10 @@ class ChangeEmailTicketSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         random_authentication_code = uuid.uuid4()
         return ChangeEmailTicket.objects.create(authentication_code=random_authentication_code,**validated_data)
+    
+
+class FollowingSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Following
+        fields = ['follower','followed_user','get_follower_name','get_followed_user_name']

@@ -82,3 +82,17 @@ class ChangeEmailTicket(models.Model):
             return 'Expired'
 
 
+class Following(models.Model):
+    follower = models.ForeignKey(User, related_name='follower', on_delete=models.CASCADE)
+    followed_user = models.ForeignKey(User, related_name='followed_user', on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def get_follower_name(self):
+        if self.follower:
+            return self.follower.username
+    def get_followed_user_name(self):
+        if self.followed_user:
+            return self.followed_user.username
+
+    def __str__(self):
+        return "{} -> {}".format(self.follower.username, self.followed_user.username)

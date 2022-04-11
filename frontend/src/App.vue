@@ -11,7 +11,7 @@
           aria-label="menu"
           aria-expanded="false"
           data-target="navbar-menu"
-          @click="switch_show_mobile"
+          @click="showMobileMenuComputed = !showMobileMenuComputed"
         >
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -26,14 +26,14 @@
       >
         <div class="navbar-start">
           <div class="navbar-item">
-            <form method="get" action="/search">
+            <form @submit.prevent="push_search">
               <div class="field has-addons">
                 <div class="control">
                   <input
                     type="text"
                     class="input"
                     placeholder="キーワードを入力"
-                    name="query"
+                    v-model="search_wordComputed"
                   />
                 </div>
 
@@ -106,7 +106,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-    console.log("store", store.state.user);
+    console.log("store:", store.state.user);
 
     // const isLoading = ref(false);
 
@@ -115,8 +115,14 @@ export default defineComponent({
     //   set: value => (isLoading.value = value)
     // });
 
-    let showMobileMenu = ref(false);
-    let showMobileMenuComputed = computed({
+    const search_word = ref<string>("");
+    const search_wordComputed = computed({
+      get: () => search_word.value,
+      set: value => (search_word.value = value)
+    });
+
+    const showMobileMenu = ref(false);
+    const showMobileMenuComputed = computed({
       get: () => showMobileMenu.value,
       set: value => (showMobileMenu.value = value)
     });
@@ -124,22 +130,34 @@ export default defineComponent({
     const reload = () => {
       store.commit("setIsLoading", true);
 
-      store.commit("reloadStore");
-      const token = store.state.token;
-      if (token) {
-        axios.defaults.headers.common["Authorization"] = "token " + token;
-      } else {
-        axios.defaults.headers.common["Authorization"] = "";
-      }
+      store.dispatch("reloadStore");
+      console.log(
+        "auth code : ",
+        axios.defaults.headers.common["Authorization"]
+      );
+
+      // if (store.state.token) {
+      //   axios.defaults.headers.common["Authorization"] =
+      //     "token " + store.state.token;
+      // } else {
+      //   axios.defaults.headers.common["Authorization"] = "";
+      // }
       // console.log(store.state);
       store.commit("setIsLoading", false);
     };
-    const switch_show_mobile = () => {
-      // console.log("yes");
 
-      showMobileMenuComputed.value = !showMobileMenuComputed.value;
-      // console.log(showMobileMenuComputed.value);
+    const push_search = () => {
+      router.push(`/search-article/${search_wordComputed.value}`);
     };
+
+    const my_profile = computed(() => {
+      if (store.state.user) {
+        return `/profile/${store.state.user.username}/`;
+      } else {
+        return "/";
+      }
+    });
+
     onMounted(() => {
       reload();
       // is_loading = store.state.is_loading;
@@ -147,10 +165,15 @@ export default defineComponent({
     return {
       isLoading: computed(() => store.state.isLoading),
       isAuthenticated: computed(() => store.state.isAuthenticated),
-      user: computed(() => store.state.user),
+
+      search_wordComputed,
+      push_search,
+
+      my_profile,
+
       showMobileMenuComputed,
-      switch_show_mobile,
-      my_profile: computed(() => "/profile/" + store.state.user.username + "/")
+
+      user: computed(() => store.state.user)
     };
   },
   computed: {}

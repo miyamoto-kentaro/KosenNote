@@ -1,67 +1,78 @@
 <template>
   <div class="email-authentication">
-    <div class="columns">
-      <div class="column is-4 is-offset-4">
-        <h1 class="title">Sign up</h1>
+    <section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <h3 class="title has-text-black">SignIn</h3>
+            <hr class="sign-in-hr" />
+            <p class="subtitle has-text-black">ユーザー登録</p>
+            <div class="box">
+              <form @submit.prevent="submitForm">
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="text"
+                      placeholder="User Name"
+                      autofocus=""
+                      v-model="usernameComputed"
+                    />
+                  </div>
+                </div>
 
-        <form @submit.prevent="submitForm">
-          <div class="field">
-            <label>User Name</label>
-            <div class="control">
-              <input type="text" class="input" v-model="usernameComputed" />
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="password"
+                      placeholder="Password"
+                      autofocus=""
+                      v-model="passwordComputed"
+                    />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="password"
+                      placeholder="Repeat password"
+                      autofocus=""
+                      v-model="password2Computed"
+                    />
+                  </div>
+                </div>
+                <template v-if="isLoading">
+                  <a class="button is-block is-info is-large is-fullwidth">
+                    登録
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </a>
+                </template>
+                <template v-else>
+                  <button class="button is-block is-info is-large is-fullwidth">
+                    登録
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </button>
+                </template>
+              </form>
             </div>
+            <p class="has-text-grey">
+              <router-link to="/log-in">ログイン</router-link>
+              &nbsp;·&nbsp;
+              <router-link to="/reset-password/send-mail"
+                >パスワードの変更</router-link
+              >
+              &nbsp;·&nbsp;
+              <router-link to="/sign-in/email/send-mail"
+                >メールアドレスの再入力</router-link
+              >
+            </p>
           </div>
-
-          <div class="field">
-            <label>Password</label>
-            <div class="control">
-              <input type="password" class="input" v-model="passwordComputed" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Repeat password</label>
-            <div class="control">
-              <input
-                type="password"
-                class="input"
-                v-model="password2Computed"
-              />
-            </div>
-          </div>
-
-          <div class="notification is-danger" v-if="errors.length">
-            <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
-          </div>
-
-          <div class="field">
-            <template v-if="isLoading">
-              <div class="control">
-                <a class="button is-dark">
-                  ユーザー登録
-                </a>
-              </div>
-            </template>
-            <template v-else>
-              <div class="control">
-                <button class="button is-dark">
-                  ユーザー登録
-                </button>
-              </div>
-            </template>
-          </div>
-          Or
-          <router-link to="/sign-in/email/send-mail"
-            >メールアドレスの再入力</router-link
-          >
-
-          <hr />
-
-          <!-- Or <router-link to="/log-in">click here</router-link> to log in! -->
-          Or click here to log in!
-        </form>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -73,33 +84,37 @@ import { toast } from "bulma-toast";
 import axios from "axios";
 
 export default defineComponent({
+  name: "EmailAuth",
   setup() {
+    document.title = "EmailAuth | KosenNote";
     // data
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
 
-    let errors: string[] = [];
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
 
     const email = route.params.email;
     const code = route.params.code;
 
-    const username = ref("");
+    const username = ref<string>("");
 
     const usernameComputed = computed({
       get: () => username.value,
       set: value => (username.value = value)
     });
 
-    const password = ref("");
-
+    const password = ref<string>("");
     const passwordComputed = computed({
       get: () => password.value,
       set: value => (password.value = value)
     });
 
-    const password2 = ref("");
-
+    const password2 = ref<string>("");
     const password2Computed = computed({
       get: () => password2.value,
       set: value => (password2.value = value)
@@ -107,22 +122,24 @@ export default defineComponent({
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
+      errorsCompute.value = [];
       try {
-        errors = [];
-        if (password.value !== password2.value) {
-          errors.push("パスワードが違います。確認してください");
+        if (passwordComputed.value !== password2Computed.value) {
+          errorsCompute.value.push("パスワードが違います。確認してください");
+        }
+        if (!usernameComputed.value) {
+          errorsCompute.value.push("ユーザー名を入力してください");
         }
 
-        if (!errors.length) {
+        if (!errorsCompute.value.length) {
           const formData = {
             email: email,
             username: username.value,
             password: password.value,
             code: code
           };
-          // console.log(formData);
 
-          store.commit("removeToken");
+          store.dispatch("InitializationStore");
           await axios
             .post(
               "/api/v1/users/users/email/pre_register/certification",
@@ -137,6 +154,8 @@ export default defineComponent({
                 duration: 2000,
                 position: "bottom-right"
               });
+              console.log(response);
+
               const user = {
                 username: response.data.data.username,
                 email: response.data.data.email
@@ -144,9 +163,8 @@ export default defineComponent({
               store.commit("setUser", user);
               // console.log(store.state.user);
               // console.log(response.data)
-              Login();
               store.commit("setIsLoading", false);
-              router.push(`/profile/${user.username}`);
+              Login();
             })
             .catch(error => {
               console.log(error.response.data);
@@ -221,13 +239,21 @@ export default defineComponent({
               store.commit("setIsLoading", false);
             });
         } else {
-          alert(errors);
-          store.commit("setIsLoading", false);
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
         }
       } catch (err) {
         console.log(err);
-        store.commit("setIsLoading", false);
       }
+      store.commit("setIsLoading", false);
     };
 
     const Login = async () => {
@@ -243,6 +269,8 @@ export default defineComponent({
           // console.log("response :", response);
           const token = response.data.auth_token;
           store.commit("setToken", token);
+
+          router.push(`/profile/${store.state.user.username}`);
         })
         .catch(error => {
           // console.log(error);
