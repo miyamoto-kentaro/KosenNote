@@ -7,9 +7,7 @@ from django.db import IntegrityError
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
-
 from .managers import CustomUserManager
-
 
 class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)

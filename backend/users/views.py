@@ -39,7 +39,6 @@ class CreatePreRegister(APIView):
         except User.DoesNotExist:
             pass
 
-    
     def exist_pre_register(self, email):
         try:
             preregister = PreRegister.objects.get(email=email)
@@ -47,8 +46,6 @@ class CreatePreRegister(APIView):
         except PreRegister.DoesNotExist:
             pass
     
-
-
     def post(self, request):
         # print(request)
         try:
