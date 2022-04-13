@@ -30,7 +30,11 @@
                     v-for="tag in articleComputed.tags"
                     v-bind:key="tag.id"
                   >
-                    {{ tag }}
+                    <span>
+                      <a @click="push_search(tag)">
+                        {{ tag }}
+                      </a></span
+                    >
                   </a>
                 </div>
               </div>
@@ -140,7 +144,13 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-    // const article_content = ref("");
+
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
+
     const article_id = route.params.article_id;
     const article = ref({
       title: "",
@@ -152,6 +162,11 @@ export default defineComponent({
       category: null,
       get_author_name: ""
     });
+    const articleComputed = computed({
+      get: () => article.value,
+      set: value => (article.value = value)
+    });
+
     const showTagsMenu = ref(false);
     const showTagsMenuComputed = computed({
       get: () => showTagsMenu.value,
@@ -162,11 +177,6 @@ export default defineComponent({
     const showDeleteMenuComputed = computed({
       get: () => showDeleteMenu.value,
       set: value => (showDeleteMenu.value = value)
-    });
-
-    const articleComputed = computed({
-      get: () => article.value,
-      set: value => (article.value = value)
     });
 
     const Itme = ref(false);
@@ -183,56 +193,92 @@ export default defineComponent({
 
     const getArticleDetail = async () => {
       store.commit("setIsLoading", true);
+      try {
+        // バリデーション
+        console.log("article_id", article_id);
 
-      await axios
-        .get(`api/v1/articles/articles/detail/${article_id}`)
-        .then(response => {
-          articleComputed.value = response.data.data;
-          if (
-            articleComputed.value.get_author_name == store.state.user.username
-          ) {
-            ItmeComputed.value = true;
+        if (article_id == "") {
+          errorsCompute.value.push("記事のidが入力されていません");
+        }
+
+        if (!errorsCompute.value.length) {
+          await axios
+            .get(`api/v1/articles/articles/detail/${article_id}`)
+            .then(response => {
+              articleComputed.value = response.data.data;
+              if (
+                articleComputed.value.get_author_name ==
+                store.state.user.username
+              ) {
+                ItmeComputed.value = true;
+              }
+            })
+            .catch(error => {
+              console.log(error.response.data);
+              if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message: "この記事は存在していません",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+                router.push("/");
+              }
+            });
+          const FormData = {
+            article_id: article_id
+          };
+          if (store.state.isAuthenticated) {
+            await axios
+              .post("api/v1/articles/goods/already_exists/", FormData)
+              .then(response => {
+                console.log(response.data.data.already_good);
+
+                isGoodComputed.value = response.data.data.already_good;
+              })
+              .catch(error => {
+                console.log(error.response.data);
+                if (error.response.data.data.error == "DoseNotExist") {
+                  toast({
+                    message: "この記事は存在していません",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                  router.push("/");
+                }
+              });
           }
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
+          store.commit("setIsLoading", false);
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: "この記事は存在していません",
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-            router.push("/");
           }
-        });
-      const FormData = {
-        article_id: article_id
-      };
-      if (store.state.isAuthenticated) {
-        await axios
-          .post("api/v1/articles/goods/already_exists/", FormData)
-          .then(response => {
-            console.log(response.data.data.already_good);
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        console.log(err);
 
-            isGoodComputed.value = response.data.data.already_good;
-          })
-          .catch(error => {
-            console.log(error.response.data);
-            if (error.response.data.data.error == "DoseNotExist") {
-              toast({
-                message: "この記事は存在していません",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-              router.push("/");
-            }
-          });
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
+        });
+        router.push("/");
       }
       store.commit("setIsLoading", false);
     };
@@ -327,6 +373,9 @@ export default defineComponent({
       }
       store.commit("setIsLoading", false);
     };
+    const push_search = (tag: string) => {
+      router.push(`/search-article/${tag}`);
+    };
 
     getArticleDetail();
 
@@ -337,7 +386,8 @@ export default defineComponent({
       showDeleteMenuComputed,
       ItmeComputed,
       isGoodComputed,
-      goodToArticle
+      goodToArticle,
+      push_search
     };
   }
 });

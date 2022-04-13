@@ -122,7 +122,8 @@ class ArticleDetail(APIView):
     def get_object(self, article_id):
         try:
             article = Article.objects.get(pk=article_id)
-            if article.get_author_name() == self.request.user or article.publish:
+            # print(str(article.get_author_name()) == str(self.request.user))
+            if str(article.get_author_name()) == str(self.request.user) or article.publish == True:
                 return article
             else:
                 raise Http404

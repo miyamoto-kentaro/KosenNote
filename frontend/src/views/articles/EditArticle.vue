@@ -101,12 +101,19 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     // const article_content = ref("");
-    let article = ref();
 
+    const article = ref();
     const articleComputed = computed({
       get: () => article.value ,
       set: value => (article.value = value)
     });
+
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
+
 
     const downloadButton = () => {
       if(articleComputed.value){
@@ -126,6 +133,14 @@ export default defineComponent({
 
     const getArticle = async () => {
       store.commit("setIsLoading", true);
+      try {
+        // バリデーション
+
+        if (!route.params.article_id) {
+          errorsCompute.value.push("記事のIDが入力されていません");
+        }
+
+        if (!errorsCompute.value.length) {
 
       await axios
         .get(
@@ -156,14 +171,56 @@ export default defineComponent({
               });
           }
         });
+        } else {
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        console.log(err);
+
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
+        });
+        router.push("/");
+      }
       store.commit("setIsLoading", false);
+    };
+
+    const save_article = () => {
+      // console.log("yes");
+      store.commit("setSavedArticle", articleComputed.value);
     };
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
-      await axios
-        .put(`api/v1/articles/articles/update/${route.params.article_id}/`, articleComputed.value)
-        .then(response => {
+      try {
+        // バリデーション
+
+        if (!articleComputed.value.title) {
+          errorsCompute.value.push("タイトルを入力してください");
+        }
+        if (!articleComputed.value.content) {
+          errorsCompute.value.push("記事にはコンテンツが必要です");
+        }
+
+        if (!errorsCompute.value.length) {
+          await axios
+            .put(`api/v1/articles/articles/update/${route.params.article_id}/`, articleComputed.value)
+            .then(response => {
           toast({
             message: "記事が保存されました",
             type: "is-success",
@@ -230,6 +287,32 @@ export default defineComponent({
             }
           }
         });
+        } else {
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        console.log(err);
+
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
+        });
+        router.push("/");
+      }
       store.commit("setIsLoading", false);
     };
 

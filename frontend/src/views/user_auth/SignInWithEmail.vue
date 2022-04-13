@@ -113,7 +113,7 @@ export default defineComponent({
               store.commit("setUser", user);
               // console.log(store.state.user);
               // console.log(response.data)
-              router.push("/sign-in/email/waiting-email");
+              // router.push("/sign-in/email/waiting-email");
             })
             .catch(error => {
               toast({
@@ -136,6 +136,7 @@ export default defineComponent({
               position: "bottom-right"
             });
           }
+          errorsCompute.value = [];
         }
       } catch (err) {
         alert("error");
@@ -145,7 +146,6 @@ export default defineComponent({
 
     return {
       emailComputed,
-      errors,
       isLoading: computed(() => store.state.isLoading),
       submitForm
     };

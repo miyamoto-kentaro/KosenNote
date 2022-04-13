@@ -39,32 +39,71 @@ export default defineComponent({
       set: value => (articleList.value = value)
     });
 
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
+
     const get_article_list = async (query: string | string[]) => {
       store.commit("setIsLoading", true);
 
       console.log(query);
+      try {
+        // バリデーション
 
-      await axios
-        .get(`api/v1/articles/articles/search/${query}`)
-        .then(response => {
-          console.log(response.data);
+        if (!route.params.query) {
+          errorsCompute.value.push("検索ワードが入力されていません");
+        }
 
-          articleListComputed.value = response.data.data;
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
+        if (!errorsCompute.value.length) {
+          await axios
+            .get(`api/v1/articles/articles/search/${query}`)
+            .then(response => {
+              console.log(response.data);
+
+              articleListComputed.value = response.data.data;
+            })
+            .catch(error => {
+              console.log(error.response.data);
+              if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message: "この記事は存在していません",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+                router.push("/");
+              }
+            });
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: "この記事は存在していません",
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-            router.push("/");
           }
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        console.log(err);
+
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
         });
+        router.push("/");
+      }
       store.commit("setIsLoading", false);
     };
     onMounted(() => {

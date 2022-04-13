@@ -1,5 +1,5 @@
 <template>
-  <div class="page-my-account">
+  <div class="page-profile">
     <div class="is-left">
       <h1 class="title">{{ usernameComputed }}</h1>
     </div>
@@ -11,7 +11,7 @@
         フォロワー {{ followerComputed.length }}
       </a>
     </div>
-    <div class="tabs  is-right">
+    <div class="tabs is-right">
       <ul>
         <li :class="{ 'is-active': showPanelComputed == 0 }">
           <a class="has-text-info" @click="showPanelComputed = 0">
@@ -252,6 +252,12 @@ export default defineComponent({
       set: value => (showPanel.value = value)
     });
 
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
+
     const showUserConfPanel = ref<number>(0);
     const showUserConfPanelComputed = computed({
       get: () => showUserConfPanel.value,
@@ -311,216 +317,274 @@ export default defineComponent({
 
     const search_user = async (username: string | string[]) => {
       store.commit("setIsLoading", true);
-      console.log("arg_username", username);
+      // console.log("arg_username", username);
+      try {
+        if (!username) {
+          errorsCompute.value.push("ユーザーが存在しません");
+        }
+        if (!errorsCompute.value.length) {
+          await axios
+            .get(`api/v1/articles/profile/${username}`)
+            .then(response => {
+              // console.log(response.data);
+              // console.log("reloading");
 
-      await axios
-        .get(`api/v1/articles/profile/${username}`)
-        .then(response => {
-          console.log(response.data);
-          console.log("reloading");
+              usernameComputed.value = response.data.data.profile.username;
+              // console.log(response.data.data.profile.username);
 
-          usernameComputed.value = response.data.data.profile.username;
-          console.log(response.data.data.profile.username);
+              articlesComputed.value = response.data.data.article_list;
+              goodsComputed.value = response.data.data.goods;
+              onfollowComputed.value = response.data.data.profile.follow;
+              followerComputed.value = response.data.data.profile.follower;
+              follow_toComputed.value = response.data.data.profile.follow_to;
 
-          articlesComputed.value = response.data.data.article_list;
-          goodsComputed.value = response.data.data.goods;
-          onfollowComputed.value = response.data.data.profile.follow;
-          followerComputed.value = response.data.data.profile.follower;
-          follow_toComputed.value = response.data.data.profile.follow_to;
+              // console.log("usernameComputed:", usernameComputed.value);
 
-          console.log("usernameComputed:", usernameComputed.value);
+              if (usernameComputed.value == store.state.user.username) {
+                // console.log("yse");
 
-          if (usernameComputed.value == store.state.user.username) {
-            console.log("yse");
-
-            ItmeComputed.value = true;
-          } else {
-            ItmeComputed.value = false;
-          }
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
+                ItmeComputed.value = true;
+              } else {
+                ItmeComputed.value = false;
+              }
+            })
+            .catch(error => {
+              // console.log(error.response.data);
+              if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message: "この記事は存在していません",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+                router.push("/");
+              }
+            });
+          await axios
+            .get(`api/v1/users/users/${usernameComputed.value}/following/`)
+            .then(response => {
+              // console.log(response.data);
+              // username.value = response.data;
+            })
+            .catch(error => {
+              // console.log(error.response.data);
+              if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message: "この記事は存在していません",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+                router.push("/");
+              }
+              store.commit("setIsLoading", false);
+            });
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: "この記事は存在していません",
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-            router.push("/");
           }
-        });
-      await axios
-        .get(`api/v1/users/users/${usernameComputed.value}/following/`)
-        .then(response => {
-          console.log(response.data);
-
-          // username.value = response.data;
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
-            toast({
-              message: "この記事は存在していません",
-              type: "is-danger",
-              dismissible: true,
-              pauseOnHover: true,
-              duration: 2000,
-              position: "bottom-right"
-            });
-            router.push("/");
-          }
-          store.commit("setIsLoading", false);
-        });
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        alert("error");
+      }
       store.commit("setIsLoading", false);
     };
 
     const update_username = async () => {
       store.commit("setIsLoading", true);
-      console.log(next_usernameComputed);
+      // console.log(next_usernameComputed);
 
-      const FormData = {
-        username: next_usernameComputed.value
-      };
+      try {
+        if (!next_usernameComputed.value) {
+          errorsCompute.value.push("新しいユーザー名を入力してください");
+        }
+        if (!errorsCompute.value.length) {
+          const FormData = {
+            username: next_usernameComputed.value
+          };
 
-      await axios
-        .put(`api/v1/users/users/update/`, FormData)
-        .then(response => {
-          console.log(response.data);
+          await axios
+            .put(`api/v1/users/users/update/`, FormData)
+            .then(response => {
+              // console.log(response.data);
 
-          store.commit("setUser", response.data.data);
-          showUserConfPanelComputed.value = 0;
-          toast({
-            message: `ユーザー名を変更しました\nNew ${store.state.user.username}`,
-            type: "is-success",
-            dismissible: true,
-            pauseOnHover: true,
-            duration: 2000,
-            position: "bottom-right"
-          });
-          router.push(`/profile/${store.state.user.username}`);
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.error == "DoseNotExist") {
+              store.commit("setUser", response.data.data);
+              showUserConfPanelComputed.value = 0;
+              toast({
+                message: `ユーザー名を変更しました\nNew ${store.state.user.username}`,
+                type: "is-success",
+                dismissible: true,
+                pauseOnHover: true,
+                duration: 2000,
+                position: "bottom-right"
+              });
+              router.push(`/profile/${store.state.user.username}`);
+            })
+            .catch(error => {
+              // console.log(error.response.data);
+              if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message: "このユーザーは存在していません",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+                router.push("/");
+              } else if (error.response.data.data.username) {
+                if (
+                  error.response.data.data.username[0] ==
+                  ["A user with that username already exists."]
+                ) {
+                  toast({
+                    message: "このユーザー名は既に使用されています",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              }
+            });
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: "このユーザーは存在していません",
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-            router.push("/");
-          } else if (error.response.data.data.username) {
-            if (
-              error.response.data.data.username[0] ==
-              ["A user with that username already exists."]
-            ) {
-              toast({
-                message: "このユーザー名は既に使用されています",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-            }
           }
-        });
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        alert("error");
+      }
       store.commit("setIsLoading", false);
     };
 
     const follow = async () => {
-      if (onfollowComputed.value == true) {
-        await axios
-          .delete(`api/v1/users/users/${usernameComputed.value}/following/`)
-          .then(response => {
-            console.log(response.data);
-            onfollowComputed.value = false;
+      try {
+        if (!errorsCompute.value.length) {
+          if (onfollowComputed.value == true) {
+            await axios
+              .delete(`api/v1/users/users/${usernameComputed.value}/following/`)
+              .then(response => {
+                // console.log(response.data);
+                onfollowComputed.value = false;
+                toast({
+                  message: `フォローを外しました`,
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+              })
+              .catch(error => {
+                // console.log(error.response.data);
+                if (error.response.data.data.error == "DoseNotExist") {
+                  toast({
+                    message: "このユーザーは存在していません",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                  router.push("/");
+                } else if (error.response.data.data.username) {
+                  if (
+                    error.response.data.data.username[0] ==
+                    ["A user with that username already exists."]
+                  ) {
+                    toast({
+                      message: "このユーザー名は既に使用されています",
+                      type: "is-danger",
+                      dismissible: true,
+                      pauseOnHover: true,
+                      duration: 2000,
+                      position: "bottom-right"
+                    });
+                  }
+                }
+              });
+          } else {
+            await axios
+              .post(`api/v1/users/users/${usernameComputed.value}/following/`)
+              .then(response => {
+                // console.log(response.data);
+                onfollowComputed.value = true;
+
+                toast({
+                  message: `フォローしました`,
+                  type: "is-success",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+              })
+              .catch(error => {
+                // console.log(error.response.data);
+                if (error.response.data.data.error == "DoseNotExist") {
+                  toast({
+                    message: "このユーザーは存在していません",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                  router.push("/");
+                } else if (error.response.data.data.username) {
+                  if (
+                    error.response.data.data.username[0] ==
+                    ["A user with that username already exists."]
+                  ) {
+                    toast({
+                      message: "このユーザー名は既に使用されています",
+                      type: "is-danger",
+                      dismissible: true,
+                      pauseOnHover: true,
+                      duration: 2000,
+                      position: "bottom-right"
+                    });
+                  }
+                }
+              });
+          }
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: `フォローを外しました`,
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-          })
-          .catch(error => {
-            console.log(error.response.data);
-            if (error.response.data.data.error == "DoseNotExist") {
-              toast({
-                message: "このユーザーは存在していません",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-              router.push("/");
-            } else if (error.response.data.data.username) {
-              if (
-                error.response.data.data.username[0] ==
-                ["A user with that username already exists."]
-              ) {
-                toast({
-                  message: "このユーザー名は既に使用されています",
-                  type: "is-danger",
-                  dismissible: true,
-                  pauseOnHover: true,
-                  duration: 2000,
-                  position: "bottom-right"
-                });
-              }
-            }
-          });
-      } else {
-        await axios
-          .post(`api/v1/users/users/${usernameComputed.value}/following/`)
-          .then(response => {
-            console.log(response.data);
-            onfollowComputed.value = true;
-
-            toast({
-              message: `フォローしました`,
-              type: "is-success",
-              dismissible: true,
-              pauseOnHover: true,
-              duration: 2000,
-              position: "bottom-right"
-            });
-          })
-          .catch(error => {
-            console.log(error.response.data);
-            if (error.response.data.data.error == "DoseNotExist") {
-              toast({
-                message: "このユーザーは存在していません",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-              router.push("/");
-            } else if (error.response.data.data.username) {
-              if (
-                error.response.data.data.username[0] ==
-                ["A user with that username already exists."]
-              ) {
-                toast({
-                  message: "このユーザー名は既に使用されています",
-                  type: "is-danger",
-                  dismissible: true,
-                  pauseOnHover: true,
-                  duration: 2000,
-                  position: "bottom-right"
-                });
-              }
-            }
-          });
+          }
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        alert("error");
       }
 
       store.commit("setIsLoading", false);
@@ -536,22 +600,21 @@ export default defineComponent({
     };
 
     onBeforeRouteUpdate((to, from, next) => {
-      console.log("param:", to.params.username);
-      console.log("router update");
+      // console.log("param:", to.params.username);
+      // console.log("router update");
 
       showPanelComputed.value = 0;
       search_user(to.params.username);
-      console.log("user:", usernameComputed.value);
+      // console.log("user:", usernameComputed.value);
 
       next();
     });
 
     search_user(route.params.username);
     onMounted(() => {
-      console.log("mounted");
-
-      console.log(showPanelComputed.value);
-      console.log(route.params.username);
+      // console.log("mounted");
+      // console.log(showPanelComputed.value);
+      // console.log(route.params.username);
     });
 
     return {

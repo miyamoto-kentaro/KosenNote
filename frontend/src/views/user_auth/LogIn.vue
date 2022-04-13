@@ -187,6 +187,7 @@ export default defineComponent({
               position: "bottom-right"
             });
           }
+          errorsCompute.value = [];
         }
       } catch (err) {
         console.log(err);

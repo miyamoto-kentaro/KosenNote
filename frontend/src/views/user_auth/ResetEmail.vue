@@ -138,7 +138,7 @@ export default defineComponent({
     });
 
     return {
-      errors
+      isLoading: computed(() => store.state.isLoading)
     };
   }
 });

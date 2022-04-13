@@ -97,7 +97,20 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     // const article_content = ref("");
-    const article = ref<Article>(store.state.saved_article);
+
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
+
+    const article = ref<Article>({
+      title: "",
+      tags: [],
+      content: "",
+      category: "",
+      publish: false
+    });
 
     const articleComputed = computed({
       get: () => article.value,
@@ -120,76 +133,115 @@ export default defineComponent({
 
     const submitForm = async () => {
       store.commit("setIsLoading", true);
-      await axios
-        .post("api/v1/articles/articles/create/", articleComputed.value)
-        .then(response => {
-          toast({
-            message: "記事が保存されました",
-            type: "is-success",
-            dismissible: true,
-            pauseOnHover: true,
-            duration: 2000,
-            position: "bottom-right"
-          });
-          store.commit("removeSavedArticle");
+      try {
+        // バリデーション
 
-          // store.commit("removeArticle", article.value);
-          console.log(response.data.data);
+        if (!articleComputed.value.title) {
+          errorsCompute.value.push("タイトルを入力してください");
+        }
+        if (!articleComputed.value.content) {
+          errorsCompute.value.push("記事にはコンテンツが必要です");
+        }
 
-          router.push(`/article-detail/${response.data.data.id}`);
-        })
-        .catch(error => {
-          console.log(error.response.data);
-          if (error.response.data.data.title) {
-            if (
-              error.response.data.data.title[0] ==
-              ["This field may not be blank."]
-            ) {
+        if (!errorsCompute.value.length) {
+          await axios
+            .post("api/v1/articles/articles/create/", articleComputed.value)
+            .then(response => {
               toast({
-                message: "タイトルが入力されていません",
-                type: "is-danger",
+                message: "記事が保存されました",
+                type: "is-success",
                 dismissible: true,
                 pauseOnHover: true,
                 duration: 2000,
                 position: "bottom-right"
               });
-            }
-          } else if (error.response.data.data.content) {
-            if (
-              error.response.data.data.content[0] ==
-              ["This field may not be blank."]
-            ) {
-              toast({
-                message: "コンテンツが必要です",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-            }
-          } else if (error.response.data.data.error == "DoseNotExist") {
+              store.commit("removeSavedArticle");
+
+              // store.commit("removeArticle", article.value);
+              console.log(response.data.data);
+
+              router.push(`/article-detail/${response.data.data.id}`);
+            })
+            .catch(error => {
+              console.log(error.response.data);
+              if (error.response.data.data.title) {
+                if (
+                  error.response.data.data.title[0] ==
+                  ["This field may not be blank."]
+                ) {
+                  toast({
+                    message: "タイトルが入力されていません",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              } else if (error.response.data.data.content) {
+                if (
+                  error.response.data.data.content[0] ==
+                  ["This field may not be blank."]
+                ) {
+                  toast({
+                    message: "コンテンツが必要です",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              } else if (error.response.data.data.error == "DoseNotExist") {
+                toast({
+                  message:
+                    "ユーザーが存在していません。正しくログインしてください",
+                  type: "is-danger",
+                  dismissible: true,
+                  pauseOnHover: true,
+                  duration: 2000,
+                  position: "bottom-right"
+                });
+              } else if (error.response.data.data.detail) {
+                if (error.response.data.data.detail == ["Invalid token."]) {
+                  toast({
+                    message:
+                      "URLに間違いがあります。再度メールを送ってください。",
+                    type: "is-danger",
+                    dismissible: true,
+                    pauseOnHover: true,
+                    duration: 2000,
+                    position: "bottom-right"
+                  });
+                }
+              }
+            });
+        } else {
+          for (var error of errorsCompute.value) {
             toast({
-              message: "ユーザーが存在していません。正しくログインしてください",
+              message: `${error}`,
               type: "is-danger",
               dismissible: true,
               pauseOnHover: true,
               duration: 2000,
               position: "bottom-right"
             });
-          } else if (error.response.data.data.detail) {
-            if (error.response.data.data.detail == ["Invalid token."]) {
-              toast({
-                message: "URLに間違いがあります。再度メールを送ってください。",
-                type: "is-danger",
-                dismissible: true,
-                pauseOnHover: true,
-                duration: 2000,
-                position: "bottom-right"
-              });
-            }
           }
+          errorsCompute.value = [];
+        }
+      } catch (err) {
+        console.log(err);
+
+        toast({
+          message: "予期せぬエラー",
+          type: "is-danger",
+          dismissible: true,
+          pauseOnHover: true,
+          duration: 2000,
+          position: "bottom-right"
         });
+        router.push("/");
+      }
       store.commit("setIsLoading", false);
     };
 
@@ -198,10 +250,11 @@ export default defineComponent({
       store.commit("setSavedArticle", articleComputed.value);
     };
 
-    // onMounted(() => {
-    //   console.log(store.state.saved_article.content);
-    //   article.value = store.state.save_article;
-    // });
+    onMounted(() => {
+      if (store.state.saved_article) {
+        articleComputed.value = store.state.saved_article;
+      }
+    });
 
     return {
       articleComputed,

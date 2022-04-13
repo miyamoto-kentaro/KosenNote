@@ -1,45 +1,62 @@
 <template>
   <div class="reset-password">
-    <div class="columns">
-      <div class="column is-4 is-offset-4">
-        <h1 class="title">ResetPassword</h1>
+    <section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <h3 class="title has-text-black">ResetPassword</h3>
+            <hr class="sign-in-hr" />
+            <p class="subtitle has-text-black">パスワードを入力してください</p>
+            <div class="box">
+              <form @submit.prevent="submitForm">
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="password"
+                      placeholder="Password"
+                      autofocus=""
+                      v-model="passwordComputed"
+                    />
+                  </div>
+                </div>
 
-        <form @submit.prevent="submitForm">
-          <div class="field">
-            <label>New Password</label>
-            <div class="control">
-              <input type="password" class="input" v-model="passwordComputed" />
+                <div class="field">
+                  <div class="control">
+                    <input
+                      class="input is-large"
+                      type="password"
+                      placeholder="Repeat password"
+                      autofocus=""
+                      v-model="password2Computed"
+                    />
+                  </div>
+                </div>
+                <template v-if="isLoading">
+                  <a class="button is-block is-info is-large is-fullwidth">
+                    リセット
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </a>
+                </template>
+                <template v-else>
+                  <button class="button is-block is-info is-large is-fullwidth">
+                    リセット
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                  </button>
+                </template>
+              </form>
             </div>
+            <p class="has-text-grey">
+              <router-link to="/log-in">ログイン</router-link>
+              &nbsp;·&nbsp;
+              <router-link to="/sign-in/email/send-mail"
+                >メールアドレスの再入力</router-link
+              >
+            </p>
           </div>
-
-          <div class="field">
-            <label>Repassword</label>
-            <div class="control">
-              <input
-                type="password"
-                class="input"
-                v-model="password2Computed"
-              />
-            </div>
-          </div>
-
-          <div class="notification is-danger" v-if="errors.length">
-            <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
-          </div>
-
-          <div class="field">
-            <div class="control">
-              <button class="button is-dark">リセット</button>
-            </div>
-          </div>
-
-          <hr />
-
-          <!-- Or <router-link to="/log-in">click here</router-link> to log in! -->
-          Or click here to log in!
-        </form>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -57,7 +74,11 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
 
-    let errors: string[] = [];
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
 
     const uid = route.params.uid;
     const token = route.params.token;
@@ -79,12 +100,11 @@ export default defineComponent({
     const submitForm = async () => {
       store.commit("setIsLoading", true);
       try {
-        errors = [];
-        if (password.value !== password2.value) {
-          errors.push("パスワードが違います。確認してください");
+        if (passwordComputed.value !== password2Computed.value) {
+          errorsCompute.value.push("パスワードが違います。確認してください");
         }
 
-        if (!errors.length) {
+        if (!errorsCompute.value.length) {
           const formData = {
             uid: uid,
             token: token,
@@ -158,8 +178,17 @@ export default defineComponent({
               }
             });
         } else {
-          alert(errors);
-          store.commit("setIsLoading", false);
+          for (var error of errorsCompute.value) {
+            toast({
+              message: `${error}`,
+              type: "is-danger",
+              dismissible: true,
+              pauseOnHover: true,
+              duration: 2000,
+              position: "bottom-right"
+            });
+          }
+          errorsCompute.value = [];
         }
       } catch (err) {
         console.log(err);
@@ -171,7 +200,7 @@ export default defineComponent({
     return {
       passwordComputed,
       password2Computed,
-      errors,
+      isLoading: computed(() => store.state.isLoading),
       submitForm
     };
   }

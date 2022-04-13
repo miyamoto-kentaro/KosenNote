@@ -1,38 +1,37 @@
 <template>
   <div class="waiting-email">
-    <div class="columns">
-      <div class="column is-4 is-offset-4">
-        <h1 class="title">Waiting Email</h1>
-
-        <form @submit.prevent="submitForm">
-          <div class="field">
-            <div class="control">
-              <template v-if="isLoading">
-                <div class="control">
-                  <a class="button is-dark">
+    <section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <h3 class="title has-text-black">SignIn</h3>
+            <hr class="sign-in-hr" />
+            <p class="subtitle has-text-black">Waiting Email</p>
+            <div class="box">
+              <form @submit.prevent="submitForm">
+                <template v-if="isLoading">
+                  <a class="button is-block is-info is-large is-fullwidth">
                     メールを送る
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
                   </a>
-                </div>
-              </template>
-              <template v-else>
-                <div class="control">
-                  <button class="button is-dark">
+                </template>
+                <template v-else>
+                  <button class="button is-block is-info is-large is-fullwidth">
                     メールを送る
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
                   </button>
-                </div>
-              </template>
+                </template>
+              </form>
             </div>
+            <p class="has-text-grey">
+              <router-link to="/sign-in/email/send-mail"
+                >メールアドレスの再入力</router-link
+              >
+            </p>
           </div>
-
-          <hr />
-
-          Or
-          <router-link to="/sign-in/email/send-mail"
-            >メールアドレスの再入力</router-link
-          >
-        </form>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -50,7 +49,11 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
 
-    let errors: string[] = [];
+    const errors = ref<string[]>([]);
+    const errorsCompute = computed({
+      get: () => errors.value,
+      set: value => (errors.value = value)
+    });
 
     const email = ref("");
 
@@ -59,22 +62,12 @@ export default defineComponent({
       set: value => (email.value = value)
     });
 
-    // async function submitForm() {
-    //   alert('called submit')
-    // }
-
-    // const push_send_email = () => {
-    //   if (store.state.user.email == "") {
-    //     router.push("/sign-in/email/send-mail");
-    //   }
-    // };
-    // push_send_email();
-
     const submitForm = async () => {
       store.commit("setIsLoading", true);
       try {
-        errors = [];
-        if (store.state.user.email) {
+        errorsCompute.value = [];
+
+        if (store.state.user) {
           const formData = {
             email: store.state.user.email
           };
@@ -111,12 +104,12 @@ export default defineComponent({
       } catch (err) {
         alert("error");
       }
+
       store.commit("setIsLoading", false);
     };
 
     return {
       emailComputed,
-      errors,
       submitForm,
       isLoading: computed(() => store.state.isLoading)
     };

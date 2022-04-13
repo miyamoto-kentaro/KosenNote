@@ -248,6 +248,7 @@ export default defineComponent({
               duration: 2000,
               position: "bottom-right"
             });
+            errorsCompute.value = [];
           }
         }
       } catch (err) {
@@ -289,7 +290,6 @@ export default defineComponent({
       usernameComputed,
       passwordComputed,
       password2Computed,
-      errors,
       isLoading: computed(() => store.state.isLoading),
       submitForm
     };
