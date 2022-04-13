@@ -36,7 +36,7 @@ export default defineComponent({
       set: value => (latestArticleList.value = value)
     });
 
-    console.log(axios.defaults.baseURL);
+    console.log("axios : ", axios.defaults.baseURL);
 
     const get_article_list = async () => {
       store.commit("setIsLoading", true);

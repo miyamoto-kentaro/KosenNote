@@ -30,7 +30,10 @@ jobs:
           app_location: "/frontend/" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          ###### End of Repository/Build Configurations ######        
+        env: # Add environment variables here
+          # Inject vars at build time
+          VUE_APP_API_BASE_URL: 'http://kosennote-api:8000' 
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
